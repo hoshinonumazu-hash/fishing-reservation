@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザー（顧客・船オーナー共通）
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  phoneNumber String    @unique
+  password    String
+  name        String?
+  role        UserRole  @default(CUSTOMER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  bookings    Booking[]
+  boats       Boat[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  CUSTOMER
+  BOAT_OWNER
+  ADMIN
+}
+
+// 船舶
+model Boat {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  location    String
+  capacity    Int
+  imageUrl    String?
+  memo        String?   // オーナー一言メモ
+  recentFish  String?   // 最近釣れている魚種
+  allowMultipleBookings Boolean @default(true) // 複数予約を許可するか（相乗りOK/貸切のみ）
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  plans         FishingPlan[]
+  planTemplates PlanTemplate[]
+  
+  @@map("boats")
+}
+
+// プランテンプレート（繰り返し使うプランの雛形）
+model PlanTemplate {
+  id          String   @id @default(cuid())
+  name        String   // テンプレート名（例: プランA、プランB）
+  description String?
+  fishType    String
+  price       Int
+  departureTime String // 出港時刻（例: "07:00"）
+  returnTime    String // 帰港時刻（例: "12:00"）
+  maxPeople   Int
+  boatId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  boat        Boat          @relation(fields: [boatId], references: [id], onDelete: Cascade)
+  plans       FishingPlan[]
+  
+  @@map("plan_templates")
+}
+
+// 釣りプラン
+model FishingPlan {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  fishType    String
+  price       Int
+  duration    Int           // 時間（分）
+  maxPeople   Int
+  date        DateTime
+  boatId      String
+  templateId  String?       // テンプレートから作成された場合のID
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  boat        Boat          @relation(fields: [boatId], references: [id], onDelete: Cascade)
+  template    PlanTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  bookings    Booking[]
+  
+  @@map("fishing_plans")
+}
+
+// 予約
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  planId          String
+  numberOfPeople  Int
+  status          BookingStatus @default(PENDING)
+  totalPrice      Int
+  customerName    String
+  customerPhone   String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            FishingPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}

@@ -1,0 +1,718 @@
+/* =============================
+   顧客用グローバルヘッダー
+============================= */
+.customer-header {
+  background: #1D3557;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.5em;
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+.header-nav {
+  display: flex;
+  gap: 2rem;
+}
+.header-nav-link {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.1em;
+  transition: color 0.2s;
+}
+.header-nav-link:hover {
+  color: #A8DADC;
+}
+
+/* =============================
+   顧客用ページ共通レイアウト
+============================= */
+.customer-main-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px 64px 16px;
+}
+.info-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  padding: 32px;
+  margin-bottom: 32px;
+}
+.quick-action-button {
+  background: #457B9D;
+  color: #fff;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-weight: bold;
+  font-size: 1.1em;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(69,123,157,0.08);
+  cursor: pointer;
+}
+.quick-action-button:hover {
+  background: #1D3557;
+  color: #fff;
+}
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #1D3557;
+  margin-bottom: 8px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  border: 1.5px solid #A8DADC;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 1em;
+  margin-bottom: 12px;
+  background: #F4F6F9;
+  color: #1D3557;
+  transition: border 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: #457B9D;
+  outline: none;
+}
+.boat-icon {
+  color: #457B9D;
+  font-size: 2.2em;
+  margin-bottom: 8px;
+}
+.boat-link {
+  color: #457B9D;
+  font-weight: bold;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.boat-link:hover {
+  color: #1D3557;
+}
+/* カレンダー・日付グリッド */
+.calendar-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  padding: 25px;
+  margin-bottom: 32px;
+}
+.month-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.month-button {
+  background: #F4F6F9;
+  border: 1px solid #A8DADC;
+  color: #1D3557;
+  padding: 10px 15px;
+  margin: 0 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s, color 0.2s;
+}
+.month-button.active {
+  background: #457B9D;
+  color: #fff;
+}
+.date-grid-container {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.weekday-cell {
+  color: #457B9D;
+  font-weight: bold;
+  padding: 10px 0;
+}
+.date-cell {
+  background: #F8F9FA;
+  padding: 12px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.date-cell:hover {
+  background: #A8DADC;
+}
+.date-cell.selected {
+  background: #457B9D;
+  color: #fff;
+  font-weight: bold;
+}
+.date-cell.disabled {
+  background: #E9ECEF;
+  color: #CED4DA;
+  cursor: not-allowed;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  
+  /* 新しいカラースキーム */
+  --color-main: #1D3557;
+  --color-sub: #457B9D;
+  --color-accent: #A8DADC;
+  --color-bg: #F4F6F9;
+  --color-card: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: #F4F6F9;
+  color: rgb(var(--foreground-rgb));
+}
+
+/* ========================================
+   A. 全体レイアウト
+   ======================================== */
+.owner-dashboard-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ========================================
+   B. サイドバー
+   ======================================== */
+.sidebar {
+  width: 16rem;
+  min-width: 16rem;
+  max-width: 16rem;
+  background-color: #1D3557 !important;
+  color: #FFFFFF !important;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-owner-info {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-owner-info h1,
+.sidebar-owner-info p {
+  color: #FFFFFF !important;
+}
+
+/* ========================================
+   C. ナビゲーション
+   ======================================== */
+.nav-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  padding-top: 20px;
+}
+
+.nav-item {
+  margin: 8px 0;
+  padding: 0 10px;
+}
+
+.nav-item a {
+  display: flex !important;
+  align-items: center !important;
+  padding: 15px 20px !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  border-radius: 0 50px 50px 0 !important;
+  background-color: transparent !important;
+}
+
+.nav-item a:hover {
+  background-color: #A8DADC !important;
+  color: #1D3557 !important;
+}
+
+.nav-item a.active {
+  background-color: #457B9D !important;
+  color: #FFFFFF !important;
+}
+
+.nav-item i {
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+}
+
+/* ========================================
+   D. メインコンテンツ
+   ======================================== */
+.main-content {
+  margin-left: 250px;
+  padding: 30px !important;
+  width: 100%;
+  background-color: #F4F6F9 !important;
+  min-height: 100vh;
+}
+
+.main-content h1 {
+  color: #1D3557 !important;
+  border-left: 5px solid #457B9D !important;
+  padding-left: 10px !important;
+  margin-bottom: 30px;
+}
+
+.main-content h2 {
+  color: #1D3557 !important;
+}
+
+/* ========================================
+   E. ダッシュボードセクション
+   ======================================== */
+.dashboard-card-section {
+  margin-bottom: 30px;
+}
+
+/* ========================================
+   F. 情報カード
+   ======================================== */
+.info-card {
+  background-color: #FFFFFF !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
+  padding: 20px !important;
+  margin-bottom: 20px;
+  transition: all 0.3s ease !important;
+  border: none !important;
+}
+
+.info-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+/* 予約カード内の要素 */
+.info-card h3 {
+  color: #1D3557;
+  margin-bottom: 10px;
+}
+
+/* 確定ステータスバッジ */
+.status-confirmed {
+  background-color: #28A745 !important;
+  color: #FFFFFF !important;
+  padding: 5px 12px;
+  border-radius: 20px !important;
+  font-size: 0.85rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ========================================
+   G. 登録船舶
+   ======================================== */
+.boat-icon {
+  font-size: 36px !important;
+  color: #457B9D !important;
+}
+
+.boat-link {
+  color: #457B9D !important;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.boat-link:hover {
+  text-decoration: underline !important;
+  color: #1D3557 !important;
+}
+
+/* ========================================
+   H. クイックアクション
+   ======================================== */
+.quick-action-button {
+  background-color: #457B9D !important;
+  color: #FFFFFF !important;
+  border-radius: 15px !important;
+  padding: 30px !important;
+  text-align: center;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none !important;
+}
+
+.quick-action-button:hover {
+  background-color: #A8DADC !important;
+  color: #1D3557 !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.quick-action-button i {
+  font-size: 48px !important;
+  margin-bottom: 10px;
+}
+
+.quick-action-button p {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ========================================
+   I. 汎用スタイル
+   ======================================== */
+a, button {
+  transition: all 0.3s ease;
+}
+
+.fa, .fas, .far, .fal, .fab {
+  transition: transform 0.3s ease;
+}
+
+/* ========================================
+   J. テキストの行数制限
+   ======================================== */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ========================================
+   K. フォームスタイル
+   ======================================== */
+.form-input, 
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #457B9D;
+  box-shadow: 0 0 0 3px rgba(69, 123, 157, 0.1);
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1D3557;
+  font-size: 0.9rem;
+}
+
+/* ========================================
+   L. 予約管理カレンダー
+   ======================================== */
+
+/* カレンダー全体 */
+.booking-calendar-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  margin-bottom: 32px;
+}
+
+/* カレンダーヘッダー */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-title {
+  font-size: 1.5em;
+  color: #1D3557;
+  font-weight: bold;
+  margin: 0;
+}
+
+.calendar-nav-button {
+  color: #457B9D;
+  font-size: 1.2em;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.calendar-nav-button:hover {
+  background-color: #F4F6F9;
+  color: #1D3557;
+}
+
+/* 曜日ヘッダー */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  border-bottom: 2px solid #A8DADC;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.weekday-label {
+  color: #1D3557;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.weekday-label.sunday {
+  color: #D32F2F;
+}
+
+.weekday-label.saturday {
+  color: #457B9D;
+}
+
+/* 日付グリッド */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.date-cell {
+  min-height: 80px;
+  background-color: #F8F9FA;
+  border-radius: 8px;
+  padding: 8px;
+  font-weight: 600;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-cell:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+
+.date-cell.out-of-month {
+  background-color: #FAFAFA;
+  opacity: 0.5;
+}
+
+.date-cell.selected {
+  border: 2px solid #457B9D;
+  background-color: #E8F4F8;
+}
+
+.date-cell.has-bookings {
+  background-color: #FFFFFF;
+  border: 1px solid #A8DADC;
+}
+
+.date-cell.fully-booked {
+  background-color: #FFE8E8;
+  border: 2px solid #D32F2F;
+}
+
+/* 日付の数字 */
+.date-number {
+  font-size: 0.85em;
+  text-align: left;
+  color: #1D3557;
+  margin-bottom: 4px;
+}
+
+.date-number.sunday-date {
+  color: #D32F2F;
+}
+
+.date-number.saturday-date {
+  color: #457B9D;
+}
+
+/* 予約状況バッジ */
+.booking-status-badge {
+  background-color: #457B9D;
+  color: #FFFFFF;
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 10px;
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.booking-status-badge.fully-booked-badge {
+  background-color: #D32F2F;
+}
+
+/* プランドット */
+.plan-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+  min-height: 12px;
+}
+
+.plan-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.plan-dot-more {
+  font-size: 0.65em;
+  color: #666;
+  margin-left: 2px;
+}
+
+/* カレンダー凡例 */
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 15px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-label {
+  font-size: 0.85em;
+  color: #1D3557;
+  font-weight: 500;
+}
+
+/* ========================================
+   M. プラン追加画面用 追加スタイル
+   ======================================== */
+
+/* 選択された日付セル */
+.selected-date-cell {
+  background-color: #457B9D !important;
+  border: 2px solid #1D3557 !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(69, 123, 157, 0.3);
+}
+
+.selected-date-cell .date-number {
+  color: #FFFFFF !important;
+  font-weight: bold;
+}
+
+/* 選択インジケーター */
+.selected-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #FFFFFF;
+  font-size: 1em;
+  animation: checkBounce 0.3s ease;
+}
+
+@keyframes checkBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 選択状況サマリー */
+.selected-dates-summary {
+  margin-top: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #E8F4F8 0%, #D5EDF6 100%);
+  border-radius: 10px;
+  border: 2px solid #457B9D;
+}
+
+.summary-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.1em;
+  color: #1D3557;
+}
+
+.summary-content i {
+  font-size: 1.5em;
+  color: #457B9D;
+}
+
+.summary-text {
+  font-weight: 600;
+}
+
+.summary-text strong {
+  color: #457B9D;
+  font-size: 1.3em;
+}
+
