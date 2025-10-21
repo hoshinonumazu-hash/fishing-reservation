@@ -67,7 +67,7 @@ EMAIL="${EMAIL:-}"  # Let's Encrypt用メールアドレス
 # データベース設定
 DB_NAME="fishing_site"
 DB_USER="fishing_user"
-DB_PASSWORD="${DB_PASSWORD:-}"  # 環境変数で指定推奨
+DB_PASSWORD="F1shApp92Zp4Lts"  # 新しいパスワードを直接指定
 
 # GitHub設定
 GITHUB_REPO="${GITHUB_REPO:-hoshinonumazu-hash/fishing-reservation}"
@@ -197,8 +197,8 @@ show_progress "ステップ4: PostgreSQLデータベースのセットアップ"
 
 # データベースパスワードの生成（未設定の場合）
 if [ -z "$DB_PASSWORD" ]; then
-    DB_PASSWORD=$(openssl rand -base64 32 | tr -d '/+=' | cut -c1-24)
-    log_info "データベースパスワードを自動生成しました"
+    DB_PASSWORD="F1shApp92Zp4Lts"
+    log_info "データベースパスワードを新しい値に設定しました"
 fi
 
 log_info "データベースとユーザーを作成しています..."
@@ -280,7 +280,7 @@ log_info ".envファイルを作成しています..."
 
 cat > "$APP_DIR/.env" <<EOF
 # Database Configuration
-DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}?schema=public"
+DATABASE_URL="postgresql://${DB_USER}:F1shApp92Zp4Lts@localhost:5432/${DB_NAME}?schema=public"
 
 # NextAuth Configuration
 NEXTAUTH_SECRET="${JWT_SECRET}"

@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // 予約詳細を取得
-export async function GET(
+export const GET = async (
   req: NextRequest,
   { params }: { params: { bookingId: string } }
-) {
+) => {
   try {
     const bookingId = params.bookingId;
 
@@ -48,13 +48,13 @@ export async function GET(
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+};
 
 // 予約ステータスを更新（キャンセルなど）
-export async function PATCH(
+export const PATCH = async (
   req: NextRequest,
   { params }: { params: { bookingId: string } }
-) {
+) => {
   try {
     const bookingId = params.bookingId;
     const body = await req.json();
@@ -119,13 +119,13 @@ export async function PATCH(
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+};
 
 // 予約を削除
-export async function DELETE(
+export const DELETE = async (
   req: NextRequest,
   { params }: { params: { bookingId: string } }
-) {
+) => {
   try {
     const bookingId = params.bookingId;
 
@@ -160,4 +160,4 @@ export async function DELETE(
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+};
