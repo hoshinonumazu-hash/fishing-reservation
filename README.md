@@ -33,20 +33,40 @@ Next.js + TypeScript + Prisma + PostgreSQL で構築された、釣り船のオ�
 
 **対象**: Ubuntu 24.04.2 LTS (64bit) - さくらのレンタルサーバー
 
-#### 完全ガイド
-詳細な手順は [SAKURA_UBUNTU_DEPLOYMENT.md](./docs/SAKURA_UBUNTU_DEPLOYMENT.md) を参照してください。
+#### 🎯 自動デプロイ（最速・推奨）
 
-#### クイックリファレンス
-コマンド一覧は [SAKURA_QUICKREF.md](./docs/SAKURA_QUICKREF.md) を参照してください。
+すべてを自動で実行します：
 
-**主な手順:**
-1. SSH接続とシステム更新
-2. Node.js 20, PostgreSQL, PM2, Nginx をインストール
-3. データベース作成とユーザー設定
-4. GitHubからクローンして環境変数設定
-5. ビルドとPM2で起動
-6. Nginxリバースプロキシ設定
-7. SSL証明書設定（Let's Encrypt）
+```bash
+# サーバーにSSH接続
+ssh username@your-server-ip
+
+# 対話式デプロイスクリプトを実行
+curl -fsSL https://raw.githubusercontent.com/hoshinonumazu-hash/fishing-reservation/main/scripts/quick-deploy.sh | sudo bash
+```
+
+**所要時間**: 約15-20分
+
+#### 📋 詳細なデプロイガイド
+
+- **[フルデプロイガイド](./docs/FULL_DEPLOYMENT_GUIDE.md)** - 完全な手順と説明
+- **[クイックデプロイ](./docs/QUICK_DEPLOY.md)** - コマンド一覧
+- **[SSH セキュリティ設定](./scripts/setup-ssh-security.sh)** - SSH鍵認証とパスワード無効化
+- **[Ubuntu デプロイ詳細](./docs/SAKURA_UBUNTU_DEPLOYMENT.md)** - 手動デプロイ手順
+- **[クイックリファレンス](./docs/SAKURA_QUICKREF.md)** - 運用コマンド集
+
+#### 🔧 主な機能
+
+自動デプロイスクリプトは以下を実行します：
+
+1. ✅ システムのアップデートと必要なソフトウェアのインストール
+2. ✅ PostgreSQLデータベースのセットアップ
+3. ✅ SSH鍵によるGitHubリポジトリクローン
+4. ✅ 環境変数の自動設定
+5. ✅ Prisma migrateとビルド
+6. ✅ PM2でのプロセス管理と自動起動設定
+7. ✅ Nginxリバースプロキシの設定
+8. ✅ Let's Encrypt SSL証明書の取得（オプション）
 
 **所要時間**: 約30-45分
 
