@@ -227,40 +227,13 @@ log_info "データベースユーザー: ${DB_USER}"
 log_warning "データベースパスワード: ${DB_PASSWORD} ※必ず安全に保管してください"
 
 ################################################################################
-# ステップ5: SSH鍵の設定（デプロイキー用）
+# ステップ5: リポジトリ認証設定（Public Repo用 - SSH鍵不要）
 ################################################################################
 
-show_progress "ステップ5: SSH鍵の設定"
+show_progress "ステップ5: リポジトリ認証設定"
 
-SSH_KEY_PATH="/home/${APP_USER}/.ssh/id_ed25519"
-
-sudo -u "$APP_USER" bash <<EOF
-mkdir -p /home/${APP_USER}/.ssh
-chmod 700 /home/${APP_USER}/.ssh
-
-if [ ! -f "${SSH_KEY_PATH}" ]; then
-    echo "SSH鍵を生成しています..."
-    ssh-keygen -t ed25519 -C "deploy@fishing-reservation" -f "${SSH_KEY_PATH}" -N ""
-    echo "SSH公開鍵:"
-    echo "=========================================="
-    cat "${SSH_KEY_PATH}.pub"
-    echo "=========================================="
-else
-    echo "SSH鍵は既に存在します"
-    cat "${SSH_KEY_PATH}.pub"
-fi
-EOF
-
-log_success "SSH鍵の準備完了"
-log_warning "上記の公開鍵をGitHubリポジトリのDeploy Keysに追加してください"
-log_info "GitHub > Settings > Deploy keys > Add deploy key"
-echo ""
-read -p "GitHubにデプロイキーを追加したら Enter を押してください..." REPLY
-
-# GitHub の known_hosts に追加
-sudo -u "$APP_USER" bash <<EOF
-ssh-keyscan github.com >> /home/${APP_USER}/.ssh/known_hosts 2>/dev/null
-EOF
+log_info "リポジトリがPublicのため、SSH鍵設定をスキップします"
+log_success "認証設定完了（HTTPS clone使用）"
 
 ################################################################################
 # ステップ6: リポジトリのクローン
@@ -268,18 +241,30 @@ EOF
 
 show_progress "ステップ6: リポジトリのクローン"
 
-if [ -d "$APP_DIR" ]; then
+# 既存のubuntuユーザーのクローンを使用
+UBUNTU_REPO="/home/ubuntu/fishing-reservation"
+if [ -d "$UBUNTU_REPO" ]; then
+    log_info "既存のクローンをコピーしています..."
+    if [ -d "$APP_DIR" ]; then
+        rm -rf "$APP_DIR"
+    fi
+    cp -r "$UBUNTU_REPO" "$APP_DIR"
+    chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+    log_success "リポジトリコピー完了"
+elif [ -d "$APP_DIR" ]; then
     log_info "既存のディレクトリを削除しています..."
     rm -rf "$APP_DIR"
+    log_info "GitHubリポジトリをクローンしています..."
+    sudo -u "$APP_USER" git clone "https://github.com/${GITHUB_REPO}.git" "$APP_DIR"
+else
+    log_info "GitHubリポジトリをクローンしています..."
+    sudo -u "$APP_USER" git clone "https://github.com/${GITHUB_REPO}.git" "$APP_DIR"
 fi
-
-log_info "GitHubリポジトリをクローンしています..."
-sudo -u "$APP_USER" git clone "git@github.com:${GITHUB_REPO}.git" "$APP_DIR"
 
 cd "$APP_DIR"
 sudo -u "$APP_USER" git checkout "$GITHUB_BRANCH"
 
-log_success "リポジトリクローン完了"
+log_success "リポジトリ準備完了"
 
 ################################################################################
 # ステップ7: 環境変数の設定
