@@ -1,5 +1,5 @@
 export const runtime = "nodejs";
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 
@@ -8,10 +8,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 // 船舶情報取得
 export async function GET(
   req: NextRequest,
-  { params }: { params: { boatId: string } }
+  context: { params: Promise<{ boatId: string }> }
 ) {
+  const params = await context.params;
+  const boatId = params.boatId;
+
   try {
-    const boatId = params.boatId;
 
     // 認証チェック
     const authHeader = req.headers.get('authorization');
@@ -75,10 +77,12 @@ export async function GET(
 // 船舶情報更新
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { boatId: string } }
+  context: { params: Promise<{ boatId: string }> }
 ) {
+  const params = await context.params;
+  const boatId = params.boatId;
+
   try {
-    const boatId = params.boatId;
 
     // 認証チェック
     const authHeader = req.headers.get('authorization');
@@ -186,10 +190,12 @@ export async function PUT(
 // 船舶削除（プランや予約がある場合は409）
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { boatId: string } }
+  context: { params: Promise<{ boatId: string }> }
 ) {
+  const params = await context.params;
+  const boatId = params.boatId;
+
   try {
-    const boatId = params.boatId;
 
     // 認証
     const authHeader = req.headers.get('authorization');

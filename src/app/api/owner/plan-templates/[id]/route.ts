@@ -9,8 +9,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 // テンプレート詳細取得
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
+  
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -50,8 +52,10 @@ export async function GET(
 // テンプレート更新
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
+  
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -109,8 +113,10 @@ export async function PUT(
 // テンプレート削除
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
+  
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
