@@ -1,11 +1,10 @@
 "use client";
 
-
-
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import type { FishingPlan } from '../../../types';
 
-export default function BoatPlansPage({ params }: { params: { boatId: string } }) {
+export default function BoatPlansPage() {
   const [plans, setPlans] = useState<FishingPlan[]>([]);
   const [date, setDate] = useState<string>("");
   const [boat, setBoat] = useState<any>(null);
@@ -16,7 +15,8 @@ export default function BoatPlansPage({ params }: { params: { boatId: string } }
   const [recentFish, setRecentFish] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const { boatId } = params;
+  const params = useParams<{ boatId: string }>();
+  const boatId = params?.boatId;
 
   useEffect(() => {
     if (!boatId) return;
