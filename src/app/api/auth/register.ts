@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '../../../lib/prisma';
+import { UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 export async function POST(req: NextRequest) {
@@ -20,8 +21,8 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         name,
-        phone,
-        role: 'user',
+        phoneNumber: phone,
+        role: UserRole.CUSTOMER,
         isActive: true,
       },
     });
