@@ -21,10 +21,8 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         name,
-        phoneNumber: phone,
-        role: UserRole.CUSTOMER,
-        isActive: true,
-      },
+  phoneNumber: phone,
+  role: UserRole.CUSTOMER,
     });
     return new Response(JSON.stringify({ message: '登録成功', user: { id: user.id, email: user.email, name: user.name } }), { status: 201 });
   } catch (e) {
