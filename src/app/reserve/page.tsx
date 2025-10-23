@@ -1,10 +1,12 @@
+export const dynamic = 'force-dynamic';
+
 "use client";
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import type { FishingPlan } from '../../types';
 
-export default function ReservePage() {
+function ReserveContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const planId = searchParams.get('planId');
@@ -360,5 +362,21 @@ export default function ReservePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReservePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-xl text-gray-600">読み込み中...</p>
+          </div>
+        </div>
+      }
+    >
+      <ReserveContent />
+    </Suspense>
   );
 }
