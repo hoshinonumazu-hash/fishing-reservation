@@ -212,8 +212,21 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  z-index: 50;
+  z-index: 45;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+/* モバイル表示: サイドバーを非表示 */
+@media (max-width: 767px) {
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 45;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
 }
 
 .sidebar-owner-info {
@@ -278,6 +291,15 @@ body {
   width: 100%;
   background-color: #F4F6F9 !important;
   min-height: 100vh;
+}
+
+/* モバイル表示: メインコンテンツを全幅に */
+@media (max-width: 767px) {
+  .main-content {
+    margin-left: 0 !important;
+    padding: 20px !important;
+    width: 100% !important;
+  }
 }
 
 .main-content h1 {

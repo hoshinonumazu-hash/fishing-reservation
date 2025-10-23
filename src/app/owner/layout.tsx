@@ -46,7 +46,7 @@ export default function OwnerLayout({
   return (
     <div className="owner-dashboard-wrapper">
       <OwnerHeader />
-      <main className="main-content">
+      <main className="main-content md:pt-[30px] pt-[70px]">
         {children}
       </main>
     </div>
