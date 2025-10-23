@@ -97,7 +97,7 @@ export default function BoatsListPage() {
               >
                 {/* 船の画像 */}
                 {boat.imageUrl ? (
-                  <div className="w-full h-48 bg-gray-200 overflow-hidden relative">
+                  <div className="w-full h-48 bg-gray-200 overflow-hidden relative rounded-t-xl">
                     <img 
                       src={boat.imageUrl} 
                       alt={boat.name}
@@ -106,12 +106,12 @@ export default function BoatsListPage() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-[#457B9D] to-[#1D3557] flex items-center justify-center">
+                  <div className="w-full h-48 bg-gradient-to-br from-[#457B9D] to-[#1D3557] flex items-center justify-center rounded-t-xl">
                     <i className="fas fa-ship text-6xl text-white/50"></i>
                   </div>
                 )}
                 {/* 船情報 */}
-                <div className="p-6">
+                <div className="p-6 bg-white">
                   <h3 className="text-xl font-bold text-[#1D3557] mb-2 flex items-center gap-2">
                     <i className="fas fa-ship text-[#457B9D]"></i>
                     {boat.name}
