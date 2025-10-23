@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         password: hashed,
         name,
   phoneNumber: phone,
-  role: UserRole.CUSTOMER,
+  role: UserRole.CUSTOMER
     });
     return new Response(JSON.stringify({ message: '登録成功', user: { id: user.id, email: user.email, name: user.name } }), { status: 201 });
   } catch (e) {
