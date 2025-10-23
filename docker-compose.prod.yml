@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: fishing
+      POSTGRES_PASSWORD: F1shApp92Zp4Lts
+      POSTGRES_DB: fishing
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://fishing:F1shApp92Zp4Lts@db:5432/fishing?schema=public"
+      NODE_ENV: production
+      NEXTAUTH_SECRET: "your-production-secret-key-change-this"
+      NEXTAUTH_URL: "http://133.242.22.159:3000"
+    ports:
+      - "3000:3000"
+    command: sh -c "npx prisma migrate deploy && npm start"
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge
