@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import Header from "@/components/Header";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -69,10 +68,8 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-      <Header />
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
           <h1 className="text-2xl font-bold mb-6 text-center">ログイン</h1>
           <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
@@ -113,6 +110,5 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
-    </>
   );
 }

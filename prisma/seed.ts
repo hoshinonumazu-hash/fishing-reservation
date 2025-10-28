@@ -70,32 +70,76 @@ async function main() {
 
   console.log(`✅ Created ${5} users`);
 
-  // 船舶作成（ダミーデータは削除、実際のデータのみ）
+  // 船舶作成（ダミーデータ：星野丸 1隻）
   console.log('🚢 Creating boats...');
 
-  // ダミーデータを削除したため、船舶は0件
-  console.log(`✅ Created ${0} boats`);
+  const hoshinoMaru = await prisma.boat.create({
+    data: {
+      name: '星野丸',
+      description: '駿河湾・相乗り可能。ビギナー歓迎。',
+      location: '沼津港',
+      capacity: 8,
+      imageUrl: 'https://images.unsplash.com/photo-1509718443690-d8e2fb3474b7?q=80&w=1600&auto=format&fit=crop',
+      memo: '安全第一で出船します。',
+      recentFish: 'タイ・アジ・イナダ',
+      ownerId: boatOwner1.id,
+      allowMultipleBookings: true,
+    },
+  });
+  console.log(`✅ Created 1 boat: ${hoshinoMaru.name}`);
 
-  // 釣りプラン作成（ダミーデータは削除）
-  console.log('🎣 Creating fishing plans...');
+  // プランテンプレート（タイ釣り）
+  const taiTemplate = await prisma.planTemplate.create({
+    data: {
+      name: 'タイ釣り',
+      description: '初心者OK。タイラバ・テンヤ可。',
+      fishType: 'タイ',
+      price: 12000,
+      departureTime: '06:00',
+      returnTime: '12:00',
+      maxPeople: 8,
+      boatId: hoshinoMaru.id,
+    },
+  });
 
-  // ダミーデータを削除したため、プランは0件
-  console.log(`✅ Created ${0} fishing plans`);
+  // 釣りプラン作成（本日から30日分：毎日）
+  console.log('🎣 Creating fishing plans (毎日/30日分)...');
 
-  // サンプル予約作成（ダミーデータは削除）
-  console.log('📅 Creating sample bookings...');
+  const today = new Date();
+  const createdPlans = [] as string[];
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(today.getDate() + i);
+    const plan = await prisma.fishingPlan.create({
+      data: {
+        title: 'タイ釣り',
+        description: '星野丸のタイ釣りプラン（毎日出船予定）',
+        fishType: 'タイ',
+        price: 12000,
+        duration: 360, // 6時間
+        maxPeople: 8,
+        date: d,
+        boatId: hoshinoMaru.id,
+        templateId: taiTemplate.id,
+      },
+    });
+    createdPlans.push(plan.id);
+  }
+  console.log(`✅ Created ${createdPlans.length} fishing plans for ${hoshinoMaru.name}`);
 
-  // ダミーデータを削除したため、予約は0件
-  console.log(`✅ Created ${0} sample bookings`);
+  // サンプル予約は今回は作らない
+  console.log('📅 Creating sample bookings... (skip)');
+  console.log(`✅ Created 0 sample bookings`);
 
   console.log('');
   console.log('✨ Seeding completed!');
   console.log('');
   console.log('📊 Summary:');
   console.log(`   - Users: 5 (2 customers, 2 boat owners, 1 admin)`);
-  console.log(`   - Boats: 0 (ダミーデータ削除済み)`);
-  console.log(`   - Fishing Plans: 0 (ダミーデータ削除済み)`);
-  console.log(`   - Bookings: 0 (ダミーデータ削除済み)`);
+  console.log(`   - Boats: 1 (星野丸)`);
+  console.log(`   - Fishing Plans: ${30} (星野丸 タイ釣り・30日分)`);
+  console.log(`   - Bookings: 0`);
   console.log('');
   console.log('🔐 Test Accounts:');
   console.log('   Customer: customer@example.com / password123');

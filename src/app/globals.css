@@ -20,17 +20,35 @@
 }
 .header-nav {
   display: flex;
-  gap: 2rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.5rem; /* モバイルは狭く */
+}
+@media (min-width: 640px) {
+  .header-nav {
+    gap: 1rem;
+  }
+}
+@media (min-width: 768px) {
+  .header-nav {
+    gap: 1.5rem;
+  }
 }
 .header-nav-link {
-  color: #fff;
+  color: #FFFFFF !important;
   font-weight: 600;
   text-decoration: none;
-  font-size: 1.1em;
+  font-size: 0.95em; /* モバイル対応で少し小さく */
   transition: color 0.2s;
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .header-nav-link {
+    font-size: 1.05em;
+  }
 }
 .header-nav-link:hover {
-  color: #A8DADC;
+  color: #A8DADC !important;
 }
 
 /* =============================

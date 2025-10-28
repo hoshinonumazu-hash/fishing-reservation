@@ -44,9 +44,9 @@ export default function OwnerLayout({
   }
 
   return (
-    <div className="owner-dashboard-wrapper">
+    <div className="min-h-screen bg-gray-50">
       <OwnerHeader />
-      <main className="main-content">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {children}
       </main>
     </div>

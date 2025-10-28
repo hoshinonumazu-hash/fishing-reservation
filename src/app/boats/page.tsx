@@ -53,16 +53,16 @@ export default function BoatsListPage() {
           </h1>
           <p className="text-gray-600">お好みの船を見つけて、釣りを楽しもう！</p>
         </div>
-        {/* 検索フィルター */}
-        <div className="info-card !p-6 mb-8">
-          <div className="flex items-center gap-3">
-            <i className="fas fa-search text-2xl text-[#457B9D]"></i>
+        {/* 検索フィルター（モバイルではみ出さないよう調整） */}
+        <div className="info-card !p-4 sm:!p-6 mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap w-full">
+            <i className="fas fa-search text-xl sm:text-2xl text-[#457B9D]"></i>
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="船名・エリアで検索（例: かるもあ、東京湾、沼津）"
-              className="form-input flex-1 !mb-0"
+              className="form-input w-full sm:flex-1 min-w-0 !mb-0"
             />
           </div>
           {query && (
@@ -93,11 +93,11 @@ export default function BoatsListPage() {
               <Link
                 key={boat.id}
                 href={`/boats/${boat.id}`}
-                className="info-card !p-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer block overflow-hidden"
+                className="info-card !p-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer block overflow-hidden rounded-xl"
               >
                 {/* 船の画像 */}
                 {boat.imageUrl ? (
-                  <div className="w-full h-48 bg-gray-200 overflow-hidden relative rounded-t-xl">
+                  <div className="w-full h-48 bg-gray-200 overflow-hidden relative">
                     <img 
                       src={boat.imageUrl} 
                       alt={boat.name}
@@ -106,7 +106,7 @@ export default function BoatsListPage() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-[#457B9D] to-[#1D3557] flex items-center justify-center rounded-t-xl">
+                  <div className="w-full h-48 bg-gradient-to-br from-[#457B9D] to-[#1D3557] flex items-center justify-center">
                     <i className="fas fa-ship text-6xl text-white/50"></i>
                   </div>
                 )}

@@ -24,64 +24,69 @@ export default function OwnerHeader() {
   };
 
   const navItems = [
-    { href: "/owner/dashboard", label: "ダッシュボード", icon: "fa-chart-line" },
+    { href: "/owner/dashboard", label: "ホーム", icon: "fa-home" },
     { href: "/owner/boats", label: "船舶管理", icon: "fa-ship" },
     { href: "/owner/bookings", label: "予約管理", icon: "fa-calendar-alt" },
     { href: "/owner/plan-templates", label: "プランテンプレート", icon: "fa-clipboard-list" },
   ];
 
   return (
-    <aside className="sidebar">
-      {/* ヘッダー部分 */}
-      <div className="sidebar-owner-info">
-        <Link href="/owner/dashboard" className="block hover:opacity-80 transition">
-          <h1 className="text-xl font-bold mb-1">釣り船予約システム</h1>
-          <p className="text-sm text-white/70">オーナー管理画面</p>
+    <header className="customer-header w-full bg-[#1D3557] shadow-lg mb-8 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 py-3 px-4 sm:py-4 sm:px-6">
+        <Link href="/" className="flex items-center gap-2 header-logo flex-shrink-0">
+          <i className="fas fa-fish text-xl sm:text-2xl text-[#A8DADC]"></i>
+          <span className="font-bold text-xl sm:text-2xl tracking-wide text-white">釣り船予約</span>
         </Link>
-      </div>
-
-      {/* ユーザー情報 */}
-      <div className="sidebar-owner-info">
-        <p className="text-sm text-white/70 mb-1">ようこそ</p>
-        <p className="font-semibold mb-2">{userName} 様</p>
-        <p className="text-xs text-white/70 mb-4">船舶オーナー</p>
-        <div className="space-y-2">
-          <Link
-            href="/"
-            className="block w-full text-center px-3 py-2 quick-action-button !bg-[#A8DADC] !text-[#1D3557] !font-bold !rounded-lg !border-0 !shadow-md hover:!bg-[#457B9D] hover:!text-white transition flex items-center justify-center gap-2"
-            style={{ letterSpacing: "0.05em", fontSize: "1.08rem" }}
-          >
-            <i className="fas fa-arrow-right-to-bracket !text-lg"></i>
-            顧客画面へ
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="w-full px-3 py-2 bg-transparent border border-white hover:bg-white/10 rounded text-sm transition"
-          >
-            ログアウト
-          </button>
-        </div>
-      </div>
-
-      {/* ナビゲーションメニュー */}
-      <nav className="flex-1 py-6">
-        <ul className="nav-menu">
+        
+        {/* ナビゲーションメニュー */}
+        <nav 
+          className="flex items-center gap-2 sm:gap-3 md:gap-4 overflow-x-auto min-w-0 flex-1"
+          style={{ 
+            display: 'flex',
+            flexWrap: 'nowrap',
+            whiteSpace: 'nowrap',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            msOverflowStyle: '-ms-autohiding-scrollbar'
+          } as React.CSSProperties}
+        >
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
-              <li key={item.href} className="nav-item">
-                <Link
-                  href={item.href}
-                  className={isActive ? "active" : ""}
-                >
-                  <i className={`fas ${item.icon}`}></i>
-                  <span>{item.label}</span>
-                </Link>
-              </li>
+              <Link 
+                key={item.href}
+                href={item.href} 
+                className={`${isActive ? 'text-[#FFD166]' : 'text-white'} hover:text-[#A8DADC] font-semibold inline-flex items-center gap-1 flex-shrink-0`}
+                style={{ whiteSpace: 'nowrap', color: isActive ? '#FFD166' : '#FFFFFF' }}
+              >
+                <i className={`fas ${item.icon}`} style={{ color: isActive ? '#FFD166' : '#FFFFFF' }}></i>
+                <span>{item.label}</span>
+              </Link>
             );
           })}
-        </ul>
-      </nav>
-    </aside>
+          {/* 顧客画面へのリンク */}
+          <Link href="/" className="text-white hover:text-[#A8DADC] font-semibold inline-flex items-center gap-1 flex-shrink-0" style={{ whiteSpace: 'nowrap', color: '#FFFFFF' }}>
+            <i className="fas fa-arrow-right-to-bracket text-white"></i>
+            <span>顧客画面</span>
+          </Link>
+        </nav>
+
+        {/* ユーザー情報・ログアウト（右端固定） */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <span className="text-white font-semibold hidden md:inline" style={{ whiteSpace: 'nowrap', color: '#FFFFFF' }}>{userName} 様</span>
+          {/* モバイルはアイコンのみ */}
+          <button
+            onClick={handleLogout}
+            className="text-gray-800 hover:text-[#FFB3B3] font-semibold bg-white/90 px-3 py-1 rounded"
+            style={{ whiteSpace: 'nowrap' }}
+            aria-label="ログアウト"
+            title="ログアウト"
+          >
+            <span className="hidden sm:inline">ログアウト</span>
+            <i className="fas fa-right-from-bracket sm:hidden"></i>
+          </button>
+        </div>
+      </div>
+    </header>
   );
 }
