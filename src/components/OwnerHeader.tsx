@@ -25,18 +25,17 @@ export default function OwnerHeader() {
 
   const navItems = [
     { href: "/owner/dashboard", label: "ホーム", icon: "fa-home" },
-    { href: "/owner/boats", label: "船舶管理", icon: "fa-ship" },
-    { href: "/owner/bookings", label: "予約管理", icon: "fa-calendar-alt" },
-    { href: "/owner/plan-templates", label: "プランテンプレート", icon: "fa-clipboard-list" },
+    { href: "/owner/bookings", label: "予約内容確認", icon: "fa-list-check" },
+    { href: "/owner/plan-editor", label: "予約プラン編集", icon: "fa-calendar-edit" },
   ];
 
   return (
     <header className="customer-header w-full bg-[#1D3557] shadow-lg mb-8 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 py-3 px-4 sm:py-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 header-logo flex-shrink-0">
+        <div className="flex items-center gap-2 header-logo flex-shrink-0">
           <i className="fas fa-fish text-xl sm:text-2xl text-[#A8DADC]"></i>
           <span className="font-bold text-xl sm:text-2xl tracking-wide text-white">釣り船予約</span>
-        </Link>
+        </div>
         
         {/* ナビゲーションメニュー */}
         <nav 
@@ -64,11 +63,6 @@ export default function OwnerHeader() {
               </Link>
             );
           })}
-          {/* 顧客画面へのリンク */}
-          <Link href="/" className="text-white hover:text-[#A8DADC] font-semibold inline-flex items-center gap-1 flex-shrink-0" style={{ whiteSpace: 'nowrap', color: '#FFFFFF' }}>
-            <i className="fas fa-arrow-right-to-bracket text-white"></i>
-            <span>顧客画面</span>
-          </Link>
         </nav>
 
         {/* ユーザー情報・ログアウト（右端固定） */}
