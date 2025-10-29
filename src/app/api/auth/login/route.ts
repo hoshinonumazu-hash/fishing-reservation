@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ message: 'メールアドレスまたはパスワードが違います。' }), { status: 401 });
     }
     // JWT発行（本番はHttpOnly Cookie推奨）
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
   return new Response(JSON.stringify({ 
     message: 'ログイン成功', 
     token, 

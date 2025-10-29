@@ -82,9 +82,12 @@ model FishingPlan {
   description String?
   fishType    String
   price       Int
+  startTime   String        // 開始時刻（例: "07:00"）
+  endTime     String        // 終了時刻（例: "12:00"）
   duration    Int           // 時間（分）
   maxPeople   Int
   date        DateTime
+  meetingPlace String?      // 出航場所（未指定の場合は船の登録港を使用）
   boatId      String
   templateId  String?       // テンプレートから作成された場合のID
   createdAt   DateTime      @default(now())

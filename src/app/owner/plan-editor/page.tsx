@@ -7,14 +7,18 @@ interface FishingPlan {
   id: string;
   title: string;
   date: string;
+  startTime: string;
+  endTime: string;
   price: number;
   fishType: string;
   duration: number;
   maxPeople: number;
   description: string;
+  meetingPlace: string;
   boat: {
     id: string;
     name: string;
+    location: string;
   };
   template?: {
     id: string;
@@ -60,7 +64,10 @@ export default function PlanEditorPage() {
         fetch(`/api/plans?boatId=${boat.id}`).then((res) => res.json())
       );
       const allPlansData = await Promise.all(allPlansPromises);
-      const flatPlans = allPlansData.flat();
+      const flatPlans = allPlansData.flat().map((plan: any) => ({
+        ...plan,
+        meetingPlace: plan.meetingPlace || plan.boat?.location || boatsData.find((b: any) => b.id === plan.boatId)?.location || '',
+      }));
       setAllPlans(flatPlans);
     } catch (error) {
       console.error("データ取得エラー:", error);
@@ -126,9 +133,14 @@ export default function PlanEditorPage() {
       '#6d4c41', // brown
     ];
     const uniqueKeys = new Set<string>();
+    
+    // テンプレートIDまたはタイトルでグルーピング
     for (const p of allPlans) {
-      uniqueKeys.add(p.template?.id || `plan:${p.id}`);
+      // テンプレートIDがある場合はそれを使用、ない場合はタイトルを使用
+      const key = p.template?.id || p.title;
+      uniqueKeys.add(key);
     }
+    
     const sortedKeys = Array.from(uniqueKeys).sort();
     const map = new Map<string, string>();
     sortedKeys.forEach((k, i) => map.set(k, colors[i % colors.length]));
@@ -161,6 +173,18 @@ export default function PlanEditorPage() {
     if (!editingPlan) return;
 
     try {
+      // 開始時間と終了時間からduration（分）を計算
+      const [startHours, startMinutes] = editingPlan.startTime.split(':').map(Number);
+      const [endHours, endMinutes] = editingPlan.endTime.split(':').map(Number);
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      const endTotalMinutes = endHours * 60 + endMinutes;
+      const duration = endTotalMinutes - startTotalMinutes;
+
+      if (duration <= 0) {
+        alert("終了時間は開始時間より後にしてください");
+        return;
+      }
+
       const token = localStorage.getItem("token");
       const res = await fetch(`/api/plans/${editingPlan.id}`, {
         method: "PATCH",
@@ -170,22 +194,28 @@ export default function PlanEditorPage() {
         },
         body: JSON.stringify({
           title: editingPlan.title,
-          date: editingPlan.date,
+          startTime: editingPlan.startTime,
+          endTime: editingPlan.endTime,
+          duration: duration,
           price: Number(editingPlan.price),
           fishType: editingPlan.fishType,
-          duration: Number(editingPlan.duration),
           maxPeople: Number(editingPlan.maxPeople),
           description: editingPlan.description,
+          meetingPlace: editingPlan.meetingPlace,
         }),
       });
 
-      if (!res.ok) throw new Error("更新に失敗しました");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "更新に失敗しました");
+      }
 
       alert("プランを更新しました");
       fetchBoatsAndPlans();
       setEditingPlan(null);
-    } catch (error) {
-      alert("更新に失敗しました");
+    } catch (error: any) {
+      console.error("保存エラー:", error);
+      alert(error.message || "更新に失敗しました");
     }
   };
 
@@ -274,7 +304,7 @@ export default function PlanEditorPage() {
                 {/* プランドット表示 */}
                 <div className="plan-dots">
                   {dayPlans.slice(0, 4).map((p) => {
-                    const colorKey = p.template?.id || `plan:${p.id}`;
+                    const colorKey = p.template?.id || p.title;
                     const color = templateColorMap.get(colorKey) || '#1e88e5';
                     return (
                       <span
@@ -356,11 +386,21 @@ export default function PlanEditorPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold mb-1 text-gray-700">所要時間（分）</label>
+                  <label className="block font-bold mb-1 text-gray-700">開始時間</label>
                   <input
-                    type="number"
-                    value={editingPlan.duration}
-                    onChange={(e) => setEditingPlan({ ...editingPlan, duration: Number(e.target.value) })}
+                    type="time"
+                    value={editingPlan.startTime}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, startTime: e.target.value })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">終了時間</label>
+                  <input
+                    type="time"
+                    value={editingPlan.endTime}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, endTime: e.target.value })}
                     className="form-input w-full px-3 py-2 border rounded"
                   />
                 </div>
@@ -382,6 +422,17 @@ export default function PlanEditorPage() {
                     value={editingPlan.fishType}
                     onChange={(e) => setEditingPlan({ ...editingPlan, fishType: e.target.value })}
                     className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">出航場所</label>
+                  <input
+                    type="text"
+                    value={editingPlan.meetingPlace}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, meetingPlace: e.target.value })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                    placeholder={`デフォルト: ${editingPlan.boat.location}`}
                   />
                 </div>
 
@@ -446,8 +497,13 @@ export default function PlanEditorPage() {
                       </div>
                       <div className="flex items-center">
                         <i className="fas fa-clock boat-icon !text-lg mr-2"></i>
-                        <span className="font-medium">所要時間:</span> 
-                        <span className="ml-1">{plan.duration}分</span>
+                        <span className="font-medium">時間:</span> 
+                        <span className="ml-1">{plan.startTime} 〜 {plan.endTime}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-map-marker-alt boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">出航場所:</span> 
+                        <span className="ml-1">{plan.meetingPlace || plan.boat.location}</span>
                       </div>
                       <div className="flex items-center">
                         <i className="fas fa-users boat-icon !text-lg mr-2"></i>

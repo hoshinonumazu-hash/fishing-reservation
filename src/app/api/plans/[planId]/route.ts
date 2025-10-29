@@ -3,11 +3,11 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { planId: string } }
+  context: { params: Promise<{ planId: string }> }
 ) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -22,8 +22,8 @@ export async function PATCH(
       return NextResponse.json({ error: "オーナー権限が必要です" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { planId } = params;
+  const body = await request.json();
+  const { planId } = await context.params;
 
     // プランの存在確認と所有者チェック
     const existingPlan = await prisma.fishingPlan.findUnique({
@@ -40,22 +40,38 @@ export async function PATCH(
     }
 
     // プラン更新
+    const toMinutes = (t?: string) => {
+      if (!t || typeof t !== 'string') return null;
+      const [h, m] = t.split(':').map((n: string) => Number(n));
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
+      return h * 60 + m;
+    };
+
+    const startMin = toMinutes((body as any).startTime);
+    const endMin = toMinutes((body as any).endTime);
+    const computedDuration = startMin !== null && endMin !== null ? endMin - startMin : null;
+
+    const updateData: any = {
+      title: body.title,
+      price: body.price,
+      fishType: Array.isArray(body.fishTypes) ? body.fishTypes.join(", ") : body.fishType || "",
+      description: body.description,
+      maxPeople: body.maxCapacity || body.maxPeople,
+    };
+  // Prisma Client で startTime/endTime 列がまだ生成されていない環境向けの暫定措置：
+  // startTime / endTime はDBに書かず、durationのみ更新する（列追加＆`prisma generate`後に有効化）
+    if (computedDuration !== null) updateData.duration = computedDuration;
+    if (body.meetingPlace !== undefined) updateData.meetingPlace = body.meetingPlace;
+
     const updatedPlan = await prisma.fishingPlan.update({
       where: { id: planId },
-      data: {
-        title: body.title,
-        date: body.date ? new Date(body.date) : undefined,
-        price: body.price,
-        fishType: Array.isArray(body.fishTypes) ? body.fishTypes.join(", ") : body.fishType || "",
-        description: body.description,
-        duration: body.duration,
-        maxPeople: body.maxCapacity || body.maxPeople,
-      },
+      data: updateData,
       include: {
         boat: {
           select: {
             id: true,
             name: true,
+            location: true,
           },
         },
       },
@@ -73,7 +89,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { planId: string } }
+  context: { params: Promise<{ planId: string }> }
 ) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -88,7 +104,7 @@ export async function DELETE(
       return NextResponse.json({ error: "オーナー権限が必要です" }, { status: 403 });
     }
 
-    const { planId } = params;
+  const { planId } = await context.params;
 
     // プランの存在確認と所有者チェック
     const existingPlan = await prisma.fishingPlan.findUnique({
