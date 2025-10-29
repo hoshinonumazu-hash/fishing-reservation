@@ -25,8 +25,8 @@ export default function OwnerHeader() {
 
   const navItems = [
     { href: "/owner/dashboard", label: "ホーム", icon: "fa-home" },
-    { href: "/owner/bookings", label: "予約内容確認", icon: "fa-list-check" },
-    { href: "/owner/plan-editor", label: "予約プラン編集", icon: "fa-calendar-edit" },
+    { href: "/owner/bookings", label: "予約確認", icon: "fa-list-check" },
+    { href: "/owner/plan-editor", label: "予約編集", icon: "fa-calendar-edit" },
   ];
 
   return (

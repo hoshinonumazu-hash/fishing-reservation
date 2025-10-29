@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 interface FishingPlan {
@@ -16,17 +16,23 @@ interface FishingPlan {
     id: string;
     name: string;
   };
+  template?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export default function PlanEditorPage() {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [plans, setPlans] = useState<FishingPlan[]>([]);
   const [allPlans, setAllPlans] = useState<FishingPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [boats, setBoats] = useState<any[]>([]);
   const [editingPlan, setEditingPlan] = useState<FishingPlan | null>(null);
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // 認証チェック
   useEffect(() => {
@@ -64,65 +70,70 @@ export default function PlanEditorPage() {
     }
   };
 
-  // 日付選択時にその日のプランを絞り込み
-  useEffect(() => {
-    if (selectedDate && allPlans.length > 0) {
-      const filtered = allPlans.filter((plan) => {
-        if (!plan.date) return false;
-        const planDate = new Date(plan.date).toISOString().slice(0, 10);
-        return planDate === selectedDate;
-      });
-      setPlans(filtered);
-    } else {
-      setPlans([]);
+  // カレンダー生成用ヘルパー
+  const monthLabel = useMemo(() => {
+    return `${currentMonth.getFullYear()}年 ${currentMonth.getMonth() + 1}月`;
+  }, [currentMonth]);
+
+  const startOfMonth = useMemo(() => new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1), [currentMonth]);
+  const endOfMonth = useMemo(() => new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0), [currentMonth]);
+  const startWeekday = useMemo(() => startOfMonth.getDay(), [startOfMonth]); // 日曜起点
+  const daysInMonth = useMemo(() => endOfMonth.getDate(), [endOfMonth]);
+
+  const calendarCells = useMemo(() => {
+    const cells: Array<{ date: Date | null }[]> = [];
+    const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
+    let cur = 1 - startWeekday;
+    for (let i = 0; i < totalCells; i++) {
+      const row = Math.floor(i / 7);
+      if (!cells[row]) cells[row] = [];
+      const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), cur);
+      const inMonth = cur >= 1 && cur <= daysInMonth;
+      cells[row].push({ date: inMonth ? d : null });
+      cur++;
     }
-  }, [selectedDate, allPlans]);
+    return cells;
+  }, [currentMonth, startWeekday, daysInMonth]);
 
-  // カレンダー生成
-  const generateCalendar = () => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startDayOfWeek = firstDay.getDay();
-
-    const calendar: (number | null)[] = [];
-    // 前月の空白
-    for (let i = 0; i < startDayOfWeek; i++) {
-      calendar.push(null);
+  // 日毎のプランをグルーピング
+  const plansByDay = useMemo(() => {
+    const map = new Map<string, FishingPlan[]>();
+    for (const p of allPlans) {
+      const d = new Date(p.date);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const arr = map.get(key) || [];
+      arr.push(p);
+      map.set(key, arr);
     }
-    // 当月の日付
-    for (let day = 1; day <= daysInMonth; day++) {
-      calendar.push(day);
+    return map;
+  }, [allPlans]);
+
+  const selectedDayPlans = useMemo(() => {
+    if (!selectedDate) return [] as FishingPlan[];
+    const key = `${selectedDate.getFullYear()}-${selectedDate.getMonth()}-${selectedDate.getDate()}`;
+    return plansByDay.get(key) || [];
+  }, [selectedDate, plansByDay]);
+
+  // テンプレートカラーのマッピング（固定パレット）
+  const templateColorMap = useMemo(() => {
+    const colors = [
+      '#e53935', // red
+      '#1e88e5', // blue
+      '#43a047', // green
+      '#8e24aa', // purple
+      '#fb8c00', // orange
+      '#00acc1', // cyan
+      '#6d4c41', // brown
+    ];
+    const uniqueKeys = new Set<string>();
+    for (const p of allPlans) {
+      uniqueKeys.add(p.template?.id || `plan:${p.id}`);
     }
-
-    return calendar;
-  };
-
-  const calendar = generateCalendar();
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const prevMonth = () => {
-    setCurrentMonth(new Date(year, month - 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentMonth(new Date(year, month + 1));
-  };
-
-  const handleDayClick = (day: number) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
-    setSelectedDate(dateStr);
-    setEditingPlan(null);
-  };
-
-  const handleEditPlan = (plan: FishingPlan) => {
-    setEditingPlan(plan);
-  };
+    const sortedKeys = Array.from(uniqueKeys).sort();
+    const map = new Map<string, string>();
+    sortedKeys.forEach((k, i) => map.set(k, colors[i % colors.length]));
+    return map;
+  }, [allPlans]);
 
   const handleCancelPlan = async (planId: string) => {
     if (!confirm("このプランを削除しますか？")) return;
@@ -178,340 +189,304 @@ export default function PlanEditorPage() {
     }
   };
 
-  // プランがある日付を取得
-  const getDatesWithPlans = () => {
-    const dates = new Set<string>();
-    allPlans.forEach((plan) => {
-      if (plan.date) {
-        const dateStr = new Date(plan.date).toISOString().slice(0, 10);
-        dates.add(dateStr);
-      }
-    });
-    return dates;
-  };
-
-  const datesWithPlans = getDatesWithPlans();
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9]">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-[#1D3557] mb-6 flex items-center gap-3">
-          <i className="fas fa-calendar-edit text-[#457B9D]"></i>
-          予約プラン編集
-        </h1>
+    <div>
+      {/* ページヘッダー */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">予約プラン編集</h1>
+        <p className="text-gray-600">カレンダーから日付を選択してプランを編集できます</p>
+      </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#457B9D] mx-auto mb-4"></div>
-            <p className="text-gray-600">読み込み中...</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* カレンダー */}
-            <div className="info-card">
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={prevMonth}
-                  className="p-2 hover:bg-gray-100 rounded"
-                  aria-label="前月"
-                >
-                  <i className="fas fa-chevron-left text-[#457B9D]"></i>
-                </button>
-                <h2 className="text-xl font-bold text-[#1D3557]">
-                  {year}年 {month + 1}月
-                </h2>
-                <button
-                  onClick={nextMonth}
-                  className="p-2 hover:bg-gray-100 rounded"
-                  aria-label="次月"
-                >
-                  <i className="fas fa-chevron-right text-[#457B9D]"></i>
-                </button>
+      {/* カレンダー */}
+      <div className="booking-calendar-card">
+        {/* カレンダーヘッダー */}
+        <div className="calendar-header">
+          <button
+            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+            className="calendar-nav-button"
+            aria-label="前の月"
+          >
+            <i className="fas fa-chevron-left"></i>
+          </button>
+          <h2 className="calendar-title">{monthLabel}</h2>
+          <button
+            onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+            className="calendar-nav-button"
+            aria-label="次の月"
+          >
+            <i className="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        {/* 曜日ヘッダー */}
+        <div className="calendar-weekdays">
+          {['日','月','火','水','木','金','土'].map((d, idx) => (
+            <div 
+              key={d} 
+              className={`weekday-label ${idx === 0 ? 'sunday' : ''} ${idx === 6 ? 'saturday' : ''}`}
+            >
+              {d}
+            </div>
+          ))}
+        </div>
+
+        {/* 日付グリッド */}
+        <div className="calendar-grid">
+          {calendarCells.flat().map((cell, idx) => {
+            const d = cell.date;
+            const inMonth = !!d;
+            const key = d ? `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` : `empty-${idx}`;
+            const dayPlans = d ? plansByDay.get(key) || [] : [];
+            const isSelected = selectedDate && d && selectedDate.toDateString() === d.toDateString();
+            const isSunday = d && d.getDay() === 0;
+            const isSaturday = d && d.getDay() === 6;
+            const hasPlans = dayPlans.length > 0;
+            
+            return (
+              <div
+                key={key}
+                className={`date-cell ${!inMonth ? 'out-of-month' : ''} ${isSelected ? 'selected' : ''} ${hasPlans ? 'has-bookings' : ''}`}
+                onClick={() => d && setSelectedDate(d)}
+                style={{ cursor: d ? 'pointer' : 'default' }}
+              >
+                <div className={`date-number ${isSunday ? 'sunday-date' : ''} ${isSaturday ? 'saturday-date' : ''}`}>
+                  {d?.getDate() || ''}
+                </div>
+                
+                {/* プラン件数バッジ */}
+                {hasPlans && (
+                  <div className="booking-status-badge">
+                    {dayPlans.length}件
+                  </div>
+                )}
+                
+                {/* プランドット表示 */}
+                <div className="plan-dots">
+                  {dayPlans.slice(0, 4).map((p) => {
+                    const colorKey = p.template?.id || `plan:${p.id}`;
+                    const color = templateColorMap.get(colorKey) || '#1e88e5';
+                    return (
+                      <span
+                        key={p.id}
+                        title={`${p.template?.name || p.title}`}
+                        className="plan-dot"
+                        style={{ backgroundColor: color }}
+                      ></span>
+                    );
+                  })}
+                  {dayPlans.length > 4 && (
+                    <span className="plan-dot-more">+{dayPlans.length - 4}</span>
+                  )}
+                </div>
               </div>
+            );
+          })}
+        </div>
 
-              {/* 曜日ヘッダー */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {["日", "月", "火", "水", "木", "金", "土"].map((day, idx) => (
-                  <div
-                    key={idx}
-                    className={`text-center font-bold text-sm py-2 ${
-                      idx === 0 ? "text-red-600" : idx === 6 ? "text-blue-600" : "text-gray-700"
-                    }`}
+        {/* 凡例 */}
+        <div className="calendar-legend">
+          {[...templateColorMap.entries()].slice(0, 8).map(([key, color]) => (
+            <div key={key} className="legend-item">
+              <span className="legend-dot" style={{ backgroundColor: color }}></span>
+              <span className="legend-label">
+                {allPlans.find(p => (p.template?.id || `plan:${p.id}`) === key)?.template?.name
+                  || allPlans.find(p => `plan:${p.id}` === key)?.title
+                  || 'プラン'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 選択日の詳細 */}
+      <div className="space-y-4">
+        {selectedDate ? (
+          selectedDayPlans.length === 0 ? (
+            <div className="info-card text-center py-10">
+              <div className="boat-icon mb-2"><i className="fas fa-inbox"></i></div>
+              <p className="text-gray-600">この日にはプランがありません</p>
+            </div>
+          ) : editingPlan ? (
+            <div className="info-card">
+              <h3 className="text-xl font-bold text-[#1D3557] mb-4 flex items-center gap-2">
+                <i className="fas fa-edit text-[#457B9D]"></i>
+                プラン編集
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">プラン名</label>
+                  <input
+                    type="text"
+                    value={editingPlan.title}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, title: e.target.value })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">日付</label>
+                  <input
+                    type="date"
+                    value={editingPlan.date.slice(0, 10)}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, date: e.target.value })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">料金（円）</label>
+                  <input
+                    type="number"
+                    value={editingPlan.price}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, price: Number(e.target.value) })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">所要時間（分）</label>
+                  <input
+                    type="number"
+                    value={editingPlan.duration}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, duration: Number(e.target.value) })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">定員</label>
+                  <input
+                    type="number"
+                    value={editingPlan.maxPeople}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, maxPeople: Number(e.target.value) })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">対象魚種</label>
+                  <input
+                    type="text"
+                    value={editingPlan.fishType}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, fishType: e.target.value })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1 text-gray-700">説明</label>
+                  <textarea
+                    value={editingPlan.description}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, description: e.target.value })}
+                    className="form-input w-full px-3 py-2 border rounded"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <button
+                    onClick={handleSavePlan}
+                    className="quick-action-button flex-1"
                   >
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* カレンダー本体 */}
-              <div className="grid grid-cols-7 gap-1">
-                {calendar.map((day, idx) => {
-                  if (day === null) {
-                    return <div key={idx} className="aspect-square"></div>;
-                  }
-
-                  const dateStr = `${year}-${String(month + 1).padStart(
-                    2,
-                    "0"
-                  )}-${String(day).padStart(2, "0")}`;
-                  const hasPlans = datesWithPlans.has(dateStr);
-                  const isSelected = selectedDate === dateStr;
-                  const dayOfWeek = idx % 7;
-
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleDayClick(day)}
-                      className={`
-                        aspect-square p-1 rounded transition-all relative
-                        ${isSelected ? "bg-[#457B9D] text-white font-bold" : "hover:bg-gray-100"}
-                        ${hasPlans && !isSelected ? "bg-[#FFD166]/20" : ""}
-                        ${dayOfWeek === 0 ? "text-red-600" : dayOfWeek === 6 ? "text-blue-600" : "text-gray-700"}
-                      `}
-                    >
-                      <span className={isSelected ? "text-white" : ""}>{day}</span>
-                      {hasPlans && (
-                        <div className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${isSelected ? "bg-white" : "bg-[#457B9D]"}`}></div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {selectedDate && (
-                <div className="mt-4 p-3 bg-[#A8DADC]/10 rounded">
-                  <p className="text-sm text-gray-700">
-                    <i className="fas fa-calendar-day text-[#457B9D] mr-2"></i>
-                    選択中: {new Date(selectedDate).toLocaleDateString("ja-JP", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      weekday: "short",
-                    })}
-                  </p>
+                    <i className="fas fa-save mr-2"></i>
+                    保存
+                  </button>
+                  <button
+                    onClick={() => setEditingPlan(null)}
+                    className="quick-action-button !bg-gray-500 hover:!bg-gray-600 flex-1"
+                  >
+                    <i className="fas fa-times mr-2"></i>
+                    キャンセル
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
-
-            {/* プラン一覧・編集エリア */}
-            <div className="info-card">
-              {!selectedDate ? (
-                <div className="text-center py-12 text-gray-500">
-                  <i className="fas fa-hand-pointer text-4xl mb-3"></i>
-                  <p>カレンダーから日付を選択してください</p>
-                </div>
-              ) : plans.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">
-                  <i className="fas fa-inbox text-4xl mb-3"></i>
-                  <p>この日のプランはありません</p>
-                </div>
-              ) : editingPlan ? (
-                <div>
-                  <h3 className="text-xl font-bold text-[#1D3557] mb-4 flex items-center gap-2">
-                    <i className="fas fa-edit text-[#457B9D]"></i>
-                    プラン編集
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        プラン名
-                      </label>
-                      <input
-                        type="text"
-                        value={editingPlan.title}
-                        onChange={(e) =>
-                          setEditingPlan({ ...editingPlan, title: e.target.value })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                      />
+          ) : (
+            selectedDayPlans.map((plan) => (
+              <div key={plan.id} className="info-card">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  {/* プラン情報 */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-xl font-bold">{plan.title}</h3>
                     </div>
-
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        日付
-                      </label>
-                      <input
-                        type="date"
-                        value={editingPlan.date.slice(0, 10)}
-                        onChange={(e) =>
-                          setEditingPlan({ ...editingPlan, date: e.target.value })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        料金（円）
-                      </label>
-                      <input
-                        type="number"
-                        value={editingPlan.price}
-                        onChange={(e) =>
-                          setEditingPlan({
-                            ...editingPlan,
-                            price: Number(e.target.value),
-                          })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        所要時間（分）
-                      </label>
-                      <input
-                        type="number"
-                        value={editingPlan.duration}
-                        onChange={(e) =>
-                          setEditingPlan({
-                            ...editingPlan,
-                            duration: Number(e.target.value),
-                          })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        定員
-                      </label>
-                      <input
-                        type="number"
-                        value={editingPlan.maxPeople}
-                        onChange={(e) =>
-                          setEditingPlan({
-                            ...editingPlan,
-                            maxPeople: Number(e.target.value),
-                          })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        対象魚種
-                      </label>
-                      <input
-                        type="text"
-                        value={editingPlan.fishType}
-                        onChange={(e) =>
-                          setEditingPlan({
-                            ...editingPlan,
-                            fishType: e.target.value,
-                          })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1 text-gray-700">
-                        説明
-                      </label>
-                      <textarea
-                        value={editingPlan.description}
-                        onChange={(e) =>
-                          setEditingPlan({
-                            ...editingPlan,
-                            description: e.target.value,
-                          })
-                        }
-                        className="form-input w-full px-3 py-2 border rounded"
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="flex gap-2 pt-4">
-                      <button
-                        onClick={handleSavePlan}
-                        className="quick-action-button flex-1"
-                      >
-                        <i className="fas fa-save mr-2"></i>
-                        保存
-                      </button>
-                      <button
-                        onClick={() => setEditingPlan(null)}
-                        className="quick-action-button !bg-gray-500 hover:!bg-gray-600 flex-1"
-                      >
-                        <i className="fas fa-times mr-2"></i>
-                        キャンセル
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="text-xl font-bold text-[#1D3557] mb-4 flex items-center gap-2">
-                    <i className="fas fa-list text-[#457B9D]"></i>
-                    この日のプラン（{plans.length}件）
-                  </h3>
-
-                  <div className="space-y-3">
-                    {plans.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className="border border-gray-200 rounded p-4 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-[#1D3557] mb-1">
-                              {plan.title}
-                            </h4>
-                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                              <i className="fas fa-ship text-[#457B9D]"></i>
-                              {plan.boat.name}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xl font-bold text-[#457B9D]">
-                              ¥{plan.price.toLocaleString()}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-sm text-gray-700 space-y-1 mb-3">
-                          <p className="flex items-center gap-2">
-                            <i className="fas fa-clock w-4 text-[#457B9D]"></i>
-                            所要時間: {plan.duration}分
-                          </p>
-                          <p className="flex items-center gap-2">
-                            <i className="fas fa-fish w-4 text-[#457B9D]"></i>
-                            {plan.fishType}
-                          </p>
-                          <p className="flex items-center gap-2">
-                            <i className="fas fa-users w-4 text-[#457B9D]"></i>
-                            定員 {plan.maxPeople}名
-                          </p>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEditPlan(plan)}
-                            className="quick-action-button flex-1 text-sm"
-                          >
-                            <i className="fas fa-edit mr-1"></i>
-                            編集
-                          </button>
-                          <button
-                            onClick={() => handleCancelPlan(plan.id)}
-                            className="quick-action-button !bg-red-600 hover:!bg-red-700 flex-1 text-sm"
-                          >
-                            <i className="fas fa-trash mr-1"></i>
-                            削除
-                          </button>
-                        </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <i className="fas fa-ship boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">船名:</span> 
+                        <span className="ml-1">{plan.boat.name}</span>
                       </div>
-                    ))}
+                      <div className="flex items-center">
+                        <i className="fas fa-calendar-day boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">実施日:</span> 
+                        <span className="ml-1">{new Date(plan.date).toLocaleDateString('ja-JP', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          weekday: 'short'
+                        })}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-fish boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">魚種:</span> 
+                        <span className="ml-1">{plan.fishType}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-clock boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">所要時間:</span> 
+                        <span className="ml-1">{plan.duration}分</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-users boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">定員:</span> 
+                        <span className="ml-1">{plan.maxPeople} 名</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-yen-sign boat-icon !text-lg mr-2"></i>
+                        <span className="font-medium">金額:</span> 
+                        <span className="text-lg font-bold boat-link ml-1">
+                          ¥{plan.price.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* アクションボタン */}
+                  <div className="flex flex-col gap-2 min-w-[200px]">
+                    <button
+                      onClick={() => setEditingPlan(plan)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium transition"
+                    >
+                      <i className="fas fa-edit mr-2"></i>
+                      編集
+                    </button>
+                    <button
+                      onClick={() => handleCancelPlan(plan.id)}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium transition"
+                    >
+                      <i className="fas fa-trash mr-2"></i>
+                      削除
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            ))
+          )
+        ) : (
+          <div className="info-card text-center py-8 text-gray-600">日付をクリックすると、その日のプランが表示されます</div>
         )}
       </div>
     </div>
