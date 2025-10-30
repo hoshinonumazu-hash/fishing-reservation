@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
         phoneNumber: true,
         name: true,
         role: true,
+        approvalStatus: true,
         createdAt: true,
         updatedAt: true,
       },
