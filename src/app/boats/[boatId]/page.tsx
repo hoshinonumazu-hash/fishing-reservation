@@ -75,7 +75,7 @@ export default function BoatPlansPage() {
           </label>
           <CalendarFilter selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
         </div>
-        <ul className="mt-6">
+  <ul className="mt-6" style={{ listStyle: 'none', paddingLeft: 0 }}>
           {filteredPlans.length === 0 && <li className="text-gray-500">該当するプランがありません</li>}
           {filteredPlans.map((plan) => {
             const p: any = plan as any;
