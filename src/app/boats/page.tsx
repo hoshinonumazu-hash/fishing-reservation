@@ -74,54 +74,28 @@ export default function BoatsListPage() {
         </div>
         {/* 船舶一覧 */}
         {filteredBoats.length === 0 ? (
-          <div className="info-card !p-16 text-center">
-            <i className="fas fa-ship text-6xl text-gray-300 mb-4"></i>
-            <p className="text-xl text-gray-600">該当する船がありません</p>
-            {query && (
-              <button 
-                onClick={() => setQuery('')}
-                className="quick-action-button !bg-[#A8DADC] !text-[#1D3557] hover:!bg-[#457B9D] hover:!text-white mt-4"
-              >
-                <i className="fas fa-redo mr-2"></i>
-                検索をクリア
-              </button>
-            )}
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-600">該当する船がありません</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBoats.map((boat) => (
-              <Link
-                key={boat.id}
-                href={`/boats/${boat.id}`}
-                className="info-card !p-0 hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer block overflow-hidden rounded-xl"
-              >
-                {/* 船の画像 */}
-                {boat.imageUrl ? (
-                  <div className="w-full h-48 bg-gray-200 overflow-hidden relative">
-                    <img 
-                      src={boat.imageUrl} 
-                      alt={boat.name}
-                      className="w-full h-full object-cover absolute top-0 left-0"
-                      style={{ maxHeight: '192px', minHeight: '192px' }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-48 bg-gradient-to-br from-[#457B9D] to-[#1D3557] flex items-center justify-center">
-                    <i className="fas fa-ship text-6xl text-white/50"></i>
-                  </div>
-                )}
-                {/* 船情報 */}
-                <div className="p-6 bg-white">
-                  <h3 className="text-xl font-bold text-[#1D3557] mb-2">
-                    {typeof boat.name === 'string' ? boat.name.replace(/^\s*🚢\s*/, '').trim() : boat.name}
-                  </h3>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <i className="fas fa-map-marker-alt text-[#457B9D] w-5"></i>
-                    <span>{(boat as any).location || '未設定'}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+          <div className="bg-white rounded-lg shadow">
+            <ul className="divide-y">
+              {filteredBoats.map((boat) => (
+                <li key={boat.id}>
+                  <Link
+                    href={`/boats/${boat.id}`}
+                    className="block p-4 hover:bg-gray-50 transition"
+                  >
+                    <div className="font-bold text-lg text-[#1D3557]">
+                      {typeof boat.name === 'string' ? boat.name.replace(/^\s*🚢\s*/, '').trim() : boat.name}
+                    </div>
+                    <div className="text-gray-600 text-sm mt-1">
+                      {(boat as any).location || '未設定'}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
