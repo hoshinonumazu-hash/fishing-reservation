@@ -170,6 +170,24 @@ export async function GET(req: NextRequest) {
 // POST (プラン作成)
 export async function POST(req: NextRequest) {
   try {
+    const token = req.headers.get('authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return new Response(JSON.stringify({ error: '認証情報がありません' }), { status: 401 });
+    }
+    // JWTからユーザーID取得
+    const { getTokenPayload } = await import('@/lib/auth');
+    const payload = getTokenPayload(token);
+    if (!payload || !payload.userId) {
+      return new Response(JSON.stringify({ error: '認証情報が不正です' }), { status: 401 });
+    }
+    // DBからユーザー取得
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!user || user.role !== 'BOAT_OWNER') {
+      return new Response(JSON.stringify({ error: 'オーナー権限がありません' }), { status: 403 });
+    }
+    if (user.approvalStatus !== 'APPROVED') {
+      return new Response(JSON.stringify({ error: 'アカウントが承認されていません' }), { status: 403 });
+    }
     const body = await req.json();
     const {
       title,

@@ -115,11 +115,11 @@ export default function AdminAccounts() {
                       <td className="px-4 py-3 text-sm text-gray-900">{new Date(user.createdAt).toLocaleDateString("ja-JP")}</td>
                       <td className="px-4 py-3 text-sm flex gap-2">
                         <button onClick={() => handleDeleteUser(user.id, user.name)} className="text-red-600 hover:text-red-800 font-semibold"><i className="fas fa-trash mr-1"></i>削除</button>
-                        {user.role === "BOAT_OWNER" && user.approvalStatus === "PENDING" && (
-                          <>
-                            <button onClick={() => handleUpdateStatus(user.id, "APPROVED")} className="ml-2 text-green-600 hover:text-green-800 font-semibold"><i className="fas fa-check mr-1"></i>承認する</button>
-                            <button onClick={() => handleUpdateStatus(user.id, "REJECTED")} className="ml-2 text-gray-600 hover:text-gray-800 font-semibold"><i className="fas fa-ban mr-1"></i>拒否する</button>
-                          </>
+                        {user.role === "BOAT_OWNER" && user.approvalStatus !== "APPROVED" && (
+                          <button onClick={() => handleUpdateStatus(user.id, "APPROVED")} className="ml-2 text-green-600 hover:text-green-800 font-semibold"><i className="fas fa-check mr-1"></i>承認する</button>
+                        )}
+                        {user.role === "BOAT_OWNER" && user.approvalStatus === "APPROVED" && (
+                          <button onClick={() => handleUpdateStatus(user.id, "REJECTED")} className="ml-2 text-gray-600 hover:text-gray-800 font-semibold"><i className="fas fa-ban mr-1"></i>承認取り消し</button>
                         )}
                         <button
                           onClick={async () => {
