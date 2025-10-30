@@ -20,28 +20,50 @@ export default function BoatPlansPage() {
 
   useEffect(() => {
     if (!boatId) return;
-    setLoading(true);
-    fetch(`/api/plans?boatId=${boatId}`)
-      .then((res) => res.json())
-      .then((data) => setPlans(data));
 
-    fetch(`/api/owner/boats`, {
-      headers: {
-        Authorization: typeof window !== 'undefined' && localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : '',
-      },
-    })
-      .then((res) => res.json())
-      .then((boats: any[]) => {
-        const found = boats.find((b) => String(b.id) === String(boatId));
+    let canceled = false;
+    const load = async () => {
+      try {
+        setLoading(true);
+        const authHeader =
+          typeof window !== 'undefined' && localStorage.getItem('token')
+            ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            : {};
+
+        const [plansRes, boatsRes] = await Promise.all([
+          fetch(`/api/plans?boatId=${boatId}`),
+          fetch(`/api/owner/boats`, { headers: { ...authHeader } }),
+        ]);
+
+        const [plansData, boatsData] = await Promise.all([
+          plansRes.ok ? plansRes.json() : Promise.resolve([]),
+          boatsRes.ok ? boatsRes.json() : Promise.resolve([]),
+        ]);
+
+        if (canceled) return;
+
+        setPlans(Array.isArray(plansData) ? plansData : []);
+
+        const boatsArr: any[] = Array.isArray(boatsData) ? boatsData : [];
+        const found = boatsArr.find((b) => String(b.id) === String(boatId));
         setBoat(found || null);
         setBoatName(found?.name || "");
         setMemo(found?.memo || null);
         setRecentFish(found?.recentFish || null);
         setDescription(found?.description || null);
         setImageUrl(found?.imageUrl || null);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+        setError("");
+      } catch (e) {
+        if (!canceled) setError('読み込みに失敗しました');
+      } finally {
+        if (!canceled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      canceled = true;
+    };
   }, [boatId]);
 
   if (loading) return <div className="text-center mt-10 text-lg text-gray-600">読み込み中...</div>;
