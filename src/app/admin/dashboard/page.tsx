@@ -25,12 +25,23 @@ type Booking = {
   };
 };
 
+type User = {
+  id: string;
+  email: string;
+  phoneNumber: string;
+  name: string | null;
+  role: string;
+  createdAt: string;
+};
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   useEffect(() => {
     // 管理者権限チェック
@@ -47,6 +58,8 @@ export default function AdminDashboard() {
 
     // 全予約データを取得
     fetchAllBookings();
+    // 全ユーザーデータを取得
+    fetchAllUsers();
   }, [router]);
 
   const fetchAllBookings = async () => {
@@ -70,6 +83,76 @@ export default function AdminDashboard() {
     } finally {
       setBookingsLoading(false);
     }
+  };
+
+  const fetchAllUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/admin/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      } else {
+        console.error("ユーザーデータの取得に失敗しました");
+      }
+    } catch (error) {
+      console.error("ユーザーデータの取得エラー:", error);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string | null) => {
+    const confirmMessage = `本当に「${userName || "このユーザー"}」を削除しますか？`;
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        alert("ユーザーを削除しました");
+        // ユーザー一覧を再取得
+        fetchAllUsers();
+      } else {
+        const data = await res.json();
+        alert(data.error || "ユーザーの削除に失敗しました");
+      }
+    } catch (error) {
+      console.error("ユーザー削除エラー:", error);
+      alert("ユーザーの削除中にエラーが発生しました");
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      CUSTOMER: "顧客",
+      BOAT_OWNER: "船オーナー",
+      ADMIN: "管理者",
+    };
+    return labels[role] || role;
+  };
+
+  const getRoleColor = (role: string) => {
+    const colors: Record<string, string> = {
+      CUSTOMER: "text-blue-600 bg-blue-50",
+      BOAT_OWNER: "text-purple-600 bg-purple-50",
+      ADMIN: "text-red-600 bg-red-50",
+    };
+    return colors[role] || "text-gray-600 bg-gray-50";
   };
 
   const getStatusLabel = (status: string) => {
@@ -188,14 +271,71 @@ export default function AdminDashboard() {
         </div>
 
         {/* アカウント管理 */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold text-[#1D3557] mb-4">
-            <i className="fas fa-users mr-2 text-[#457B9D]"></i>
-            アカウント管理
-          </h2>
-          <p className="text-gray-600">
-            ユーザーアカウントの削除などを行えます（準備中）
-          </p>
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b">
+            <h2 className="text-2xl font-bold text-[#1D3557]">
+              <i className="fas fa-users mr-2 text-[#457B9D]"></i>
+              アカウント管理
+            </h2>
+            <p className="text-gray-600 mt-1">
+              全ユーザーアカウント（全{users.length}件）
+            </p>
+          </div>
+
+          <div className="p-6">
+            {usersLoading ? (
+              <p className="text-center text-gray-500">読み込み中...</p>
+            ) : users.length === 0 ? (
+              <p className="text-center text-gray-500">ユーザーがいません</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50 border-b-2 border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">ユーザー名</th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">メールアドレス</th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">ロール</th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">登録日</th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {users.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {user.name || "-"}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {user.email}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${getRoleColor(
+                              user.role
+                            )}`}
+                          >
+                            {getRoleLabel(user.role)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {new Date(user.createdAt).toLocaleDateString("ja-JP")}
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <button
+                            onClick={() => handleDeleteUser(user.id, user.name)}
+                            className="text-red-600 hover:text-red-800 font-semibold"
+                          >
+                            <i className="fas fa-trash mr-1"></i>
+                            削除
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
