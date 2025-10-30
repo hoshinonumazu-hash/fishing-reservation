@@ -112,8 +112,7 @@ export default function BoatsListPage() {
                 )}
                 {/* 船情報 */}
                 <div className="p-6 bg-white">
-                  <h3 className="text-xl font-bold text-[#1D3557] mb-2 flex items-center gap-2">
-                    <i className="fas fa-ship text-[#457B9D]"></i>
+                  <h3 className="text-xl font-bold text-[#1D3557] mb-2">
                     {typeof boat.name === 'string' ? boat.name.replace(/^\s*🚢\s*/, '').trim() : boat.name}
                   </h3>
                   <div className="flex items-center gap-2 text-gray-700">
