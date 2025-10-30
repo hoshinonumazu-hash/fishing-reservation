@@ -25,33 +25,43 @@ export default function BoatPlansPage() {
     const load = async () => {
       try {
         setLoading(true);
-        const authHeader =
-          typeof window !== 'undefined' && localStorage.getItem('token')
-            ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            : {};
 
-        const [plansRes, boatsRes] = await Promise.all([
-          fetch(`/api/plans?boatId=${boatId}`),
-          fetch(`/api/owner/boats`, { headers: { ...authHeader } }),
-        ]);
-
-        const [plansData, boatsData] = await Promise.all([
-          plansRes.ok ? plansRes.json() : Promise.resolve([]),
-          boatsRes.ok ? boatsRes.json() : Promise.resolve([]),
-        ]);
+        // プランデータを取得（船情報も含まれる）
+        const plansRes = await fetch(`/api/plans?boatId=${boatId}`);
+        const plansData = await plansRes.json();
 
         if (canceled) return;
 
-        setPlans(Array.isArray(plansData) ? plansData : []);
+        const plansArray = Array.isArray(plansData) ? plansData : [];
+        setPlans(plansArray);
 
-        const boatsArr: any[] = Array.isArray(boatsData) ? boatsData : [];
-        const found = boatsArr.find((b) => String(b.id) === String(boatId));
-        setBoat(found || null);
-        setBoatName(found?.name || "");
-        setMemo(found?.memo || null);
-        setRecentFish(found?.recentFish || null);
-        setDescription(found?.description || null);
-        setImageUrl(found?.imageUrl || null);
+        // プランから船情報を取得
+        if (plansArray.length > 0 && plansArray[0].boat) {
+          const boatInfo = plansArray[0].boat;
+          setBoat(boatInfo);
+          setBoatName(boatInfo.name || "");
+          // 船の詳細情報がない場合は空にする
+          setMemo(null);
+          setRecentFish(null);
+          setDescription(null);
+          setImageUrl(boatInfo.imageUrl || null);
+        } else {
+          // プランがない場合は全船リストから取得
+          const boatsRes = await fetch(`/api/boats`);
+          if (boatsRes.ok) {
+            const boatsData = await boatsRes.json();
+            const boatsArr: any[] = Array.isArray(boatsData) ? boatsData : [];
+            const found = boatsArr.find((b) => String(b.id) === String(boatId));
+            if (found) {
+              setBoat(found);
+              setBoatName(found.name || "");
+              setMemo(found.memo || null);
+              setRecentFish(found.recentFish || null);
+              setDescription(found.description || null);
+              setImageUrl(found.imageUrl || null);
+            }
+          }
+        }
         setError("");
       } catch (e) {
         if (!canceled) setError('読み込みに失敗しました');
