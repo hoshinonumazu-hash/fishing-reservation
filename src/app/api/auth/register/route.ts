@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
         name,
         phoneNumber: phone,
         role,
+        approvalStatus: role === "BOAT_OWNER" ? "PENDING" : "APPROVED",
       },
     });
     let boat = null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Booking = {
@@ -31,8 +31,80 @@ type User = {
   phoneNumber: string;
   name: string | null;
   role: string;
+  approvalStatus: string;
   createdAt: string;
+  const getApprovalLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      PENDING: "承認待ち",
+      APPROVED: "承認済み",
+      REJECTED: "拒否",
+    };
+    return labels[status] || status;
+  };
+
+  const getApprovalColor = (status: string) => {
+    const colors: Record<string, string> = {
+      PENDING: "text-yellow-600 bg-yellow-50",
+      APPROVED: "text-green-600 bg-green-50",
+      REJECTED: "text-gray-600 bg-gray-100",
+    };
+    return colors[status] || "text-gray-600 bg-gray-50";
+  };
 };
+
+function AdminStatsCards() {
+  const [stats, setStats] = useState({
+    monthlyBookings: 0,
+    monthlyRevenue: 0,
+    newUsers: 0,
+    pendingOwners: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/admin/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+      setLoading(false);
+    };
+    fetchStats();
+  }, []);
+
+  return (
+    <div className="flex gap-6 mb-8">
+      <div className="flex-1 bg-white rounded-lg shadow p-6 text-center">
+        <div className="text-2xl font-bold text-[#1D3557]">
+          {loading ? "-" : stats.monthlyBookings}
+        </div>
+        <div className="text-gray-600 mt-2">今月の予約件数</div>
+      </div>
+      <div className="flex-1 bg-white rounded-lg shadow p-6 text-center">
+        <div className="text-2xl font-bold text-[#1D3557]">
+          {loading ? "-" : `¥${stats.monthlyRevenue.toLocaleString()}`}
+        </div>
+        <div className="text-gray-600 mt-2">今月の売上</div>
+      </div>
+      <div className="flex-1 bg-white rounded-lg shadow p-6 text-center">
+        <div className="text-2xl font-bold text-[#1D3557]">
+          {loading ? "-" : stats.newUsers}
+        </div>
+        <div className="text-gray-600 mt-2">今月の新規登録ユーザー</div>
+      </div>
+      <div className="flex-1 bg-white rounded-lg shadow p-6 text-center">
+        <div className="text-2xl font-bold text-[#E9C46A]">
+          {loading ? "-" : stats.pendingOwners}
+        </div>
+        <div className="text-gray-600 mt-2">承認待ちオーナー</div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -46,7 +118,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     // 管理者権限チェック
     const role = localStorage.getItem("role");
-    
+
     if (role !== "ADMIN") {
       alert("管理者権限がありません");
       router.push("/");
@@ -192,11 +264,14 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-[#1D3557] mb-4">
           <i className="fas fa-shield-halved mr-3 text-[#FF6B6B]"></i>
-          管理者ダッシュボード
+          管理者ホーム
         </h1>
         <p className="text-lg text-gray-600 mb-8">
-          ここで全予約の確認やアカウント削除を行います
+          サイト全体の統計データと予約状況を確認できます
         </p>
+
+        {/* 統計カード */}
+        <AdminStatsCards />
 
         {/* 全予約の確認 */}
         <div className="bg-white rounded-lg shadow mb-6">
@@ -220,13 +295,27 @@ export default function AdminDashboard() {
                 <table className="w-full text-left">
                   <thead className="bg-gray-50 border-b-2 border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">予約日</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">ステータス</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">ユーザー名</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">船名</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">プラン名</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">人数</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">料金</th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        予約日
+                      </th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        ステータス
+                      </th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        ユーザー名
+                      </th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        船名
+                      </th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        プラン名
+                      </th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        人数
+                      </th>
+                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        料金
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -260,74 +349,6 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 py-3 text-sm font-semibold text-gray-900">
                           ¥{booking.totalPrice.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* アカウント管理 */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <h2 className="text-2xl font-bold text-[#1D3557]">
-              <i className="fas fa-users mr-2 text-[#457B9D]"></i>
-              アカウント管理
-            </h2>
-            <p className="text-gray-600 mt-1">
-              全ユーザーアカウント（全{users.length}件）
-            </p>
-          </div>
-
-          <div className="p-6">
-            {usersLoading ? (
-              <p className="text-center text-gray-500">読み込み中...</p>
-            ) : users.length === 0 ? (
-              <p className="text-center text-gray-500">ユーザーがいません</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-50 border-b-2 border-gray-200">
-                    <tr>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">ユーザー名</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">メールアドレス</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">ロール</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">登録日</th>
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {user.name || "-"}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {user.email}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${getRoleColor(
-                              user.role
-                            )}`}
-                          >
-                            {getRoleLabel(user.role)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {new Date(user.createdAt).toLocaleDateString("ja-JP")}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <button
-                            onClick={() => handleDeleteUser(user.id, user.name)}
-                            className="text-red-600 hover:text-red-800 font-semibold"
-                          >
-                            <i className="fas fa-trash mr-1"></i>
-                            削除
-                          </button>
                         </td>
                       </tr>
                     ))}

@@ -246,11 +246,19 @@ export async function POST(req: NextRequest) {
     // 船が存在するか確認
     const boat = await prisma.boat.findUnique({
       where: { id: String(boatId) },
+      include: { owner: true },
     });
 
     if (!boat) {
       return new Response(JSON.stringify({ message: '指定された船が見つかりません' }), {
         status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    // オーナーの承認ステータス確認
+    if (boat.owner.role === 'BOAT_OWNER' && boat.owner.approvalStatus !== 'APPROVED') {
+      return new Response(JSON.stringify({ message: 'オーナーアカウントが承認されていません' }), {
+        status: 403,
         headers: { 'Content-Type': 'application/json' },
       });
     }
