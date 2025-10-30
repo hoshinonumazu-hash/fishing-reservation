@@ -1,4 +1,6 @@
+
 "use client";
+import PlanTable from "./PlanTable";
 
 export default function AdminPlans() {
   return (
@@ -7,8 +9,7 @@ export default function AdminPlans() {
         <i className="fas fa-calendar-alt mr-2 text-[#457B9D]"></i>
         予約プラン管理
       </h1>
-      <p className="text-lg text-gray-600 mb-8">ここに予約プラン管理機能を実装してください。</p>
-      {/* プラン一覧・検索・編集UIをここに追加 */}
+  <PlanTable />
     </div>
   );
 }
