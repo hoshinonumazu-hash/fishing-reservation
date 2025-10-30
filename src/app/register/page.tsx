@@ -20,7 +20,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     setSuccess(false);
-    if (!email || !password || !name || !phone || !role || (role === "BOAT_OWNER" && !boatName)) {
+    if (!email || !password || !name || !phone || !role) {
       setError("全ての項目を入力してください。");
       return;
     }
