@@ -4,8 +4,8 @@ import bcrypt from 'bcrypt';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name, phone, role, boatName } = await req.json();
-    if (!email || !password || !name || !phone || !role || (role === "BOAT_OWNER" && !boatName)) {
+    const { email, password, name, phone, role } = await req.json();
+    if (!email || !password || !name || !phone || !role) {
       return new Response(JSON.stringify({ message: '全ての項目を入力してください。' }), { status: 400 });
     }
     if (!["CUSTOMER", "BOAT_OWNER"].includes(role)) {
@@ -34,19 +34,7 @@ export async function POST(req: NextRequest) {
         approvalStatus: role === "BOAT_OWNER" ? "PENDING" : "APPROVED",
       },
     });
-    let boat = null;
-    if (role === "BOAT_OWNER") {
-      // オーナー用の釣り船を作成
-      boat = await prisma.boat.create({
-        data: {
-          name: boatName,
-          ownerId: user.id,
-          location: "未設定",
-          capacity: 10,
-        },
-      });
-    }
-    return new Response(JSON.stringify({ message: '登録成功', user: { id: user.id, email: user.email, name: user.name, role: user.role }, boat }), { status: 201 });
+    return new Response(JSON.stringify({ message: '登録成功', user: { id: user.id, email: user.email, name: user.name, role: user.role } }), { status: 201 });
   } catch (e: any) {
     // Prismaのユニーク制約エラーを明示的に返す
     if (e.code === 'P2002') {

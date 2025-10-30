@@ -61,19 +61,7 @@ export default function RegisterPage() {
               <option value="BOAT_OWNER">釣り船オーナーとして登録</option>
             </select>
           </div>
-          {role === "BOAT_OWNER" && (
-            <div>
-              <label className="block text-sm font-medium mb-1">釣り船名</label>
-              <input
-                type="text"
-                value={boatName}
-                onChange={e => setBoatName(e.target.value)}
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                placeholder="例: カルモア丸"
-                required={role === "BOAT_OWNER"}
-              />
-            </div>
-          )}
+          {/* 釣り船名入力欄はオーナー登録時も表示しない */}
           <div>
             <label className="block text-sm font-medium mb-1">氏名</label>
             <input
