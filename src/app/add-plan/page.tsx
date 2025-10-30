@@ -218,7 +218,10 @@ export default function AddPlan() {
             maxPeople: selectedTemplate.maxPeople,
             date: new Date(date).toISOString(),
             boatId: selectedTemplate.boatId,
-            templateId: selectedTemplate.id
+            templateId: selectedTemplate.id,
+            // 時間はテンプレートの出港/帰港時刻を送る
+            departureTime: selectedTemplate.departureTime,
+            returnTime: selectedTemplate.returnTime
           })
         }).then(async r => {
           if (r.ok) return { ok: true };
