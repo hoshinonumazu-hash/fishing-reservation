@@ -78,6 +78,10 @@ export default function AdminAccounts() {
         <i className="fas fa-users mr-2 text-[#457B9D]"></i>
         アカウント管理
       </h1>
+      <div className="flex gap-4 mb-6">
+        <a href="/admin/plans" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold">予約プラン管理</a>
+        <a href="/admin/boats" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold">登録船舶管理</a>
+      </div>
       <div className="flex items-center gap-4 mb-4">
         <p className="text-lg text-gray-600">全ユーザーアカウント（全{users.length}件）</p>
         <label className="text-sm font-semibold">絞り込み: </label>
