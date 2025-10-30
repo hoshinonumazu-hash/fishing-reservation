@@ -106,7 +106,11 @@ export default function AdminAccounts() {
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getRoleColor(user.role)}`}>{getRoleLabel(user.role)}</span>
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getApprovalColor(user.approvalStatus)}`}>{getApprovalLabel(user.approvalStatus)}</span>
+                        {user.role === "BOAT_OWNER" ? (
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getApprovalColor(user.approvalStatus)}`}>{getApprovalLabel(user.approvalStatus)}</span>
+                        ) : (
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold text-gray-500 bg-gray-100">-</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900">{new Date(user.createdAt).toLocaleDateString("ja-JP")}</td>
                       <td className="px-4 py-3 text-sm flex gap-2">
@@ -117,6 +121,29 @@ export default function AdminAccounts() {
                             <button onClick={() => handleUpdateStatus(user.id, "REJECTED")} className="ml-2 text-gray-600 hover:text-gray-800 font-semibold"><i className="fas fa-ban mr-1"></i>拒否する</button>
                           </>
                         )}
+                        <button
+                          onClick={async () => {
+                            const newPassword = window.prompt("新しいパスワードを入力してください（6文字以上）");
+                            if (!newPassword || newPassword.length < 6) {
+                              alert("パスワードは6文字以上で入力してください");
+                              return;
+                            }
+                            const token = localStorage.getItem("token");
+                            const res = await fetch(`/api/admin/users/${user.id}/reset-password`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                              body: JSON.stringify({ newPassword }),
+                            });
+                            if (res.ok) {
+                              alert("パスワードをリセットしました");
+                            } else {
+                              alert("パスワードリセットに失敗しました");
+                            }
+                          }}
+                          className="ml-2 text-blue-600 hover:text-blue-800 font-semibold"
+                        >
+                          <i className="fas fa-key mr-1"></i>パスワードリセット
+                        </button>
                       </td>
                     </tr>
                   ))}
