@@ -52,7 +52,6 @@ const getApprovalColor = (status: string) => {
   };
   return colors[status] || "text-gray-600 bg-gray-50";
 };
-};
 
 function AdminStatsCards() {
   const [stats, setStats] = useState({
