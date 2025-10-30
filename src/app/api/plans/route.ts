@@ -269,8 +269,6 @@ export async function POST(req: NextRequest) {
     const dur = typeof duration === 'number' ? duration : (sMin !== null && eMin !== null ? eMin - sMin : 300);
 
     // プランをDBに作成
-    // 注意: サーバー側で startTime/endTime/meetingPlace のカラムが未適用の場合に備えて、ここでは書き込まない
-    //       マイグレーション適用＆ prisma generate 後に書き込みを有効化する
     const newPlan = await prisma.fishingPlan.create({
       data: {
         title,
@@ -282,7 +280,9 @@ export async function POST(req: NextRequest) {
         date: date ? new Date(date) : new Date(),
         boatId: String(boatId),
         templateId: templateId ?? null,
-        // startTime, endTime, meetingPlace はサーバーでのスキーマ更新が完了したら再度有効化
+        startTime: sTime,
+        endTime: eTime,
+        meetingPlace: (meetingPlace as string) || boat.location,
       },
     });
 

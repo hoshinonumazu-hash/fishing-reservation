@@ -58,9 +58,9 @@ export async function PATCH(
       description: body.description,
       maxPeople: body.maxCapacity || body.maxPeople,
     };
-  // Prisma Client で startTime/endTime 列がまだ生成されていない環境向けの暫定措置：
-  // startTime / endTime はDBに書かず、durationのみ更新する（列追加＆`prisma generate`後に有効化）
     if (computedDuration !== null) updateData.duration = computedDuration;
+    if (typeof (body as any).startTime === 'string') updateData.startTime = (body as any).startTime;
+    if (typeof (body as any).endTime === 'string') updateData.endTime = (body as any).endTime;
     if (body.meetingPlace !== undefined) updateData.meetingPlace = body.meetingPlace;
 
     const updatedPlan = await prisma.fishingPlan.update({

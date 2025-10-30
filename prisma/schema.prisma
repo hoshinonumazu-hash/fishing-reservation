@@ -82,8 +82,8 @@ model FishingPlan {
   description String?
   fishType    String
   price       Int
-  startTime   String        // 開始時刻（例: "07:00"）
-  endTime     String        // 終了時刻（例: "12:00"）
+  startTime   String        @default("07:00") // 開始時刻（例: "07:00"）
+  endTime     String        @default("12:00") // 終了時刻（例: "12:00"）
   duration    Int           // 時間（分）
   maxPeople   Int
   date        DateTime
