@@ -83,7 +83,7 @@ export default function BoatPlansPage() {
 
   return (
     <div className="add-plan-wrapper max-w-3xl mx-auto px-4 py-8">
-      <h1 className="page-header text-2xl font-bold mb-4">{boatName ? boatName.split('🚢').join('').trim() : '船'}</h1>
+      <h1 className="page-header text-2xl font-bold mb-4">{boatName || '船'}</h1>
         {memo && (
           <div className="info-card mb-4 text-base">
             <span className="font-bold">一言：</span>{memo}
@@ -103,7 +103,7 @@ export default function BoatPlansPage() {
             const p: any = plan as any;
             return (
               <li key={String(p.id)} className="info-card mb-6">
-                <h3 className="font-bold text-lg mb-1">{p.title}</h3>
+                <h3 className="font-bold text-lg mb-1">{typeof p.title === 'string' ? p.title.replace(/^\s*🚢\s*/, '').trim() : p.title}</h3>
                 <div className="mb-1">実施日: {p.date ?? '-'}</div>
                 <div className="mb-1">料金: {p.price}円</div>
                 <div className="mb-1">対象魚種: {Array.isArray(p.fishTypes) ? p.fishTypes.join(', ') : '-'}</div>
