@@ -68,6 +68,12 @@ export default function Header() {
               <span>オーナー</span>
             </Link>
           )}
+          {role === 'ADMIN' && (
+            <Link href="/admin/dashboard" className="text-[#FF6B6B] hover:text-[#FF8787] font-bold inline-flex items-center gap-1 flex-shrink-0" style={{ whiteSpace: 'nowrap', color: '#FF6B6B' }}>
+              <i className="fas fa-shield-halved text-[#FF6B6B]"></i>
+              <span>サイト管理者用ページ</span>
+            </Link>
+          )}
         </nav>
 
         {/* ユーザー情報・ログアウト（右端固定） */}

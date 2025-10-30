@@ -60,10 +60,10 @@ async function main() {
 
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@example.com',
+      email: 'hoshinonumazu@gmail.com',
       phoneNumber: '090-9999-8888',
-      password: hashedPassword,
-      name: '管理者',
+      password: await bcrypt.hash('QJDSXr6OY=', 10),
+      name: 'サイト管理者',
       role: UserRole.ADMIN,
     },
   });
@@ -144,7 +144,7 @@ async function main() {
   console.log('🔐 Test Accounts:');
   console.log('   Customer: customer@example.com / password123');
   console.log('   Boat Owner: owner1@example.com / password123');
-  console.log('   Admin: admin@example.com / password123');
+  console.log('   Admin: hoshinonumazu@gmail.com / QJDSXr6OY=');
   console.log('');
 }
 
