@@ -22,6 +22,19 @@ export default function BoatTable() {
     }
   };
   const filtered = boats.filter(b => b.name.includes(search) || b.ownerName.includes(search) || b.location.includes(search));
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("本当に削除しますか？")) return;
+    const res = await fetch("/api/admin/boats", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) {
+      setBoats(boats.filter(b => b.id !== id));
+    } else {
+      alert("削除に失敗しました");
+    }
+  };
   return (
     <div>
       <div className="mb-4 flex gap-2">
@@ -46,7 +59,7 @@ export default function BoatTable() {
               <td className="px-2 py-1">{boat.capacity}</td>
               <td className="px-2 py-1 flex gap-2">
                 <button className="text-blue-600 hover:underline">編集</button>
-                <button className="text-red-600 hover:underline">削除</button>
+                <button className="text-red-600 hover:underline" onClick={() => handleDelete(boat.id)}>削除</button>
               </td>
             </tr>
           ))}
