@@ -84,13 +84,13 @@ export default function BoatsListPage() {
                 <li key={boat.id}>
                   <Link
                     href={`/boats/${boat.id}`}
-                    className="block p-4 hover:bg-gray-50 transition"
+                    className="block p-6 hover:bg-gray-50 transition"
                   >
-                    <div className="font-bold text-lg text-[#1D3557]">
+                    <div className="text-xl font-bold text-[#1D3557]">
                       {typeof boat.name === 'string' ? boat.name.replace(/^\s*🚢\s*/, '').trim() : boat.name}
-                    </div>
-                    <div className="text-gray-600 text-sm mt-1">
-                      {(boat as any).location || '未設定'}
+                      {(boat as any).location && (
+                        <span className="text-gray-600 font-normal">（{(boat as any).location}）</span>
+                      )}
                     </div>
                   </Link>
                 </li>
