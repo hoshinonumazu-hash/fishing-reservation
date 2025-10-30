@@ -83,7 +83,7 @@ export default function BoatPlansPage() {
 
   return (
     <div className="add-plan-wrapper max-w-3xl mx-auto px-4 py-8">
-      <h1 className="page-header text-2xl font-bold mb-4">{boatName || '船'}</h1>
+      <h1 className="page-header text-2xl font-bold mb-4">{boatName ? boatName.split('🚢').join('').trim() : '船'}</h1>
         {memo && (
           <div className="info-card mb-4 text-base">
             <span className="font-bold">一言：</span>{memo}
