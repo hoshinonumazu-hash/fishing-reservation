@@ -15,6 +15,7 @@ type User = {
 export default function AdminAccounts() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [roleFilter, setRoleFilter] = useState<string>("ALL");
 
   useEffect(() => {
     fetchAllUsers();
@@ -77,7 +78,16 @@ export default function AdminAccounts() {
         <i className="fas fa-users mr-2 text-[#457B9D]"></i>
         アカウント管理
       </h1>
-      <p className="text-lg text-gray-600 mb-8">全ユーザーアカウント（全{users.length}件）</p>
+      <div className="flex items-center gap-4 mb-4">
+        <p className="text-lg text-gray-600">全ユーザーアカウント（全{users.length}件）</p>
+        <label className="text-sm font-semibold">絞り込み: </label>
+        <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} className="border rounded px-2 py-1">
+          <option value="ALL">すべて</option>
+          <option value="BOAT_OWNER">船オーナー</option>
+          <option value="CUSTOMER">顧客</option>
+          <option value="ADMIN">管理者</option>
+        </select>
+      </div>
       <div className="bg-white rounded-lg shadow">
         <div className="p-6">
           {loading ? (
@@ -98,7 +108,7 @@ export default function AdminAccounts() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {users.map((user) => (
+                  {users.filter(user => roleFilter === "ALL" || user.role === roleFilter).map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm text-gray-900">{user.name || "-"}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{user.email}</td>
@@ -119,7 +129,10 @@ export default function AdminAccounts() {
                           <button onClick={() => handleUpdateStatus(user.id, "APPROVED")} className="ml-2 text-green-600 hover:text-green-800 font-semibold"><i className="fas fa-check mr-1"></i>承認する</button>
                         )}
                         {user.role === "BOAT_OWNER" && user.approvalStatus === "APPROVED" && (
-                          <button onClick={() => handleUpdateStatus(user.id, "REJECTED")} className="ml-2 text-gray-600 hover:text-gray-800 font-semibold"><i className="fas fa-ban mr-1"></i>承認取り消し</button>
+                          <>
+                            <button onClick={() => handleUpdateStatus(user.id, "REJECTED")} className="ml-2 text-gray-600 hover:text-gray-800 font-semibold"><i className="fas fa-ban mr-1"></i>承認取り消し</button>
+                            <button onClick={() => handleUpdateStatus(user.id, "PENDING")} className="ml-2 text-yellow-600 hover:text-yellow-800 font-semibold"><i className="fas fa-undo mr-1"></i>承認待ちに戻す</button>
+                          </>
                         )}
                         {user.role === "BOAT_OWNER" && user.approvalStatus === "REJECTED" && (
                           <button onClick={() => handleUpdateStatus(user.id, "PENDING")} className="ml-2 text-yellow-600 hover:text-yellow-800 font-semibold"><i className="fas fa-undo mr-1"></i>承認待ちに戻す</button>
