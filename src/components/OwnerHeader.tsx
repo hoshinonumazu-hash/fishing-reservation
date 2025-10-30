@@ -32,10 +32,10 @@ export default function OwnerHeader() {
   return (
     <header className="customer-header w-full bg-[#1D3557] shadow-lg mb-8 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 py-3 px-4 sm:py-4 sm:px-6">
-        <div className="flex items-center gap-2 header-logo flex-shrink-0">
+        <Link href="/boats" className="flex items-center gap-2 header-logo flex-shrink-0 hover:opacity-80 transition">
           <i className="fas fa-fish text-xl sm:text-2xl text-[#A8DADC]"></i>
           <span className="font-bold text-xl sm:text-2xl tracking-wide text-white">釣り船予約</span>
-        </div>
+        </Link>
         
         {/* ナビゲーションメニュー */}
         <nav 
