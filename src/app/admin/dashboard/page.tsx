@@ -33,23 +33,25 @@ type User = {
   role: string;
   approvalStatus: string;
   createdAt: string;
-  const getApprovalLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      PENDING: "承認待ち",
-      APPROVED: "承認済み",
-      REJECTED: "拒否",
-    };
-    return labels[status] || status;
-  };
+};
 
-  const getApprovalColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PENDING: "text-yellow-600 bg-yellow-50",
-      APPROVED: "text-green-600 bg-green-50",
-      REJECTED: "text-gray-600 bg-gray-100",
-    };
-    return colors[status] || "text-gray-600 bg-gray-50";
+const getApprovalLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    PENDING: "承認待ち",
+    APPROVED: "承認済み",
+    REJECTED: "拒否",
   };
+  return labels[status] || status;
+};
+
+const getApprovalColor = (status: string) => {
+  const colors: Record<string, string> = {
+    PENDING: "text-yellow-600 bg-yellow-50",
+    APPROVED: "text-green-600 bg-green-50",
+    REJECTED: "text-gray-600 bg-gray-100",
+  };
+  return colors[status] || "text-gray-600 bg-gray-50";
+};
 };
 
 function AdminStatsCards() {
