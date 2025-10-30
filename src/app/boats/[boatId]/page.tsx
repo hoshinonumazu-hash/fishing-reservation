@@ -19,65 +19,7 @@ export default function BoatPlansPage() {
   const boatId = params?.boatId;
 
   useEffect(() => {
-    return (
-      <div className="add-plan-wrapper max-w-3xl mx-auto px-4 py-8">
-        <h1 className="page-header text-2xl font-bold mb-4">{boatName || '船'}</h1>
-        {memo && (
-          <div className="info-card mb-4 text-base">
-            <span className="font-bold">一言：</span>{memo}
-          </div>
-        )}
-        {/* カレンダーUI（オーナー予約管理ページと同じ） */}
-        <div className="mb-6">
-          <label className="font-bold block mb-2">
-            <i className="fas fa-calendar-alt mr-2 text-[#457B9D]"></i>
-            日にちで絞り込む
-          </label>
-          <CalendarFilter selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
-        </div>
-        <ul className="mt-6">
-          {filteredPlans.length === 0 && <li className="text-gray-500">該当するプランがありません</li>}
-          {filteredPlans.map((plan) => {
-            const p: any = plan as any;
-            return (
-              <li key={String(p.id)} className="info-card mb-6">
-                <h3 className="font-bold text-lg mb-1">{p.title}</h3>
-                <div className="mb-1">実施日: {p.date ?? '-'}</div>
-                <div className="mb-1">料金: {p.price}円</div>
-                <div className="mb-1">対象魚種: {Array.isArray(p.fishTypes) ? p.fishTypes.join(', ') : '-'}</div>
-                <div className="mb-1">出船: {p.departureTime} / 帰港: {p.returnTime}</div>
-                <div className="mb-1">定員: {p.maxCapacity}人</div>
-                <div className="mb-1">集合場所: {p.meetingPlace}</div>
-                <div className="mb-2">{p.description}</div>
-                <div className="mt-4 text-center">
-                  <a
-                    href={`/reserve?planId=${p.id}`}
-                    className="quick-action-button text-lg px-8 py-3"
-                    style={{ display: 'inline-block', minWidth: 180 }}
-                  >
-                    予約に進む
-                  </a>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    );
-            <span className="font-bold">一言：</span>{memo}
-          </div>
-        )}
-        {/* カレンダーUI（オーナー予約管理ページと同じ） */}
-        <div className="mb-6">
-          <label className="font-bold block mb-2">
-            <i className="fas fa-calendar-alt mr-2 text-[#457B9D]"></i>
-            日にちで絞り込む
-          </label>
-          <CalendarFilter selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
-        </div>
-// カレンダーUIコンポーネント（オーナー予約管理ページから移植）
-// 必要なimportをファイル先頭に追加
-// ---
+    // ...existing code...
 type CalendarFilterProps = {
   selectedDate: Date | null;
   setSelectedDate: (d: Date | null) => void;
