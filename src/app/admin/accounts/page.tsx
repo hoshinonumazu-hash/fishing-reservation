@@ -121,6 +121,9 @@ export default function AdminAccounts() {
                         {user.role === "BOAT_OWNER" && user.approvalStatus === "APPROVED" && (
                           <button onClick={() => handleUpdateStatus(user.id, "REJECTED")} className="ml-2 text-gray-600 hover:text-gray-800 font-semibold"><i className="fas fa-ban mr-1"></i>承認取り消し</button>
                         )}
+                        {user.role === "BOAT_OWNER" && user.approvalStatus === "REJECTED" && (
+                          <button onClick={() => handleUpdateStatus(user.id, "PENDING")} className="ml-2 text-yellow-600 hover:text-yellow-800 font-semibold"><i className="fas fa-undo mr-1"></i>承認待ちに戻す</button>
+                        )}
                         <button
                           onClick={async () => {
                             const newPassword = window.prompt("新しいパスワードを入力してください（6文字以上）");
