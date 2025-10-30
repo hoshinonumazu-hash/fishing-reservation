@@ -56,7 +56,7 @@ export default function AdminAccounts() {
     const res = await fetch(`/api/admin/users/${userId}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ approvalStatus: status }),
+      body: JSON.stringify({ status }),
     });
     if (res.ok) {
       alert(status === "APPROVED" ? "承認しました" : "拒否しました");
