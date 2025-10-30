@@ -24,6 +24,7 @@ model User {
   boats       Boat[]
 
   @@map("users")
+    approvalStatus ApprovalStatus @default(PENDING)
 }
 
 enum UserRole {
